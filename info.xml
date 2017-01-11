@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<extension key="eu.businessandcode.bemasreporting" type="module">
+  <file>bemasreporting</file>
+  <name>BEMAS Reporting</name>
+  <description>Custom rapporten BEMAS</description>
+  <license>AGPL-3.0</license>
+  <maintainer>
+    <author>Alain Benbassat</author>
+    <email>alain@businessandcode.eu</email>
+  </maintainer>
+  <releaseDate>2017-01-11</releaseDate>
+  <version>1.0</version>
+  <develStage>stable</develStage>
+  <compatibility>
+    <ver>4.2</ver>
+  </compatibility>
+  <comments>Deze extensie bevat de custom rapporten van BEMAS</comments>
+  <civix>
+    <namespace>CRM/Bemasreporting</namespace>
+  </civix>
+</extension>
