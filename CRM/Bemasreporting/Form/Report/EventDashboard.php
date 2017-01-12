@@ -40,6 +40,16 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
             'required' => TRUE,
             'dbAlias' => '-1',
           ),
+          'fee_to_be_invoiced' => array(
+            'title' => ts('Te factureren bedrag'),
+            'required' => TRUE,
+            'dbAlias' => '-1',
+          ),
+          'fee_invoiced' => array(
+            'title' => ts('Gefactureerd bedrag'),
+            'required' => TRUE,
+            'dbAlias' => '-1',
+          ),
         ),
         'filters' => array(
           'start_date' => array(
@@ -104,7 +114,7 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
 
   function from() {
     $this->_from = " FROM  civicrm_event {$this->_aliases['civicrm_event']} 
-      LEFT OUTER JOIN civicrm_value_activiteit_status_25 {$this->_aliases['civicrm_event_custom']} 
+      LEFT OUTER JOIN civicrm_value_activiteit_status_25 {$this->_aliases['civicrm_event_custom']}
       ON {$this->_aliases['civicrm_event']}.id = {$this->_aliases['civicrm_event_custom']}.entity_id";
   }
 
@@ -175,10 +185,12 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
 
       // count the registered participants (= everything but no show and cancel
       $statusIDs = '3,4';
-      $sql = "select count(*) from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and 
+      $sql = "select count(*) count_result, ifnull(sum(ifnull(fee_amount, 0) - ifnull(discount_amount, 0)), 0) fee_result from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and 
         p.event_id = " . $row['civicrm_event_id'] . " and p.role_id = 1 and p.status_id not in (" . $statusIDs . ")";
-      $count = CRM_Core_DAO::singleValueQuery($sql);
-      $rows[$rowNum]['civicrm_event_registered_attended'] = $count;
+      $dao = CRM_Core_DAO::executeQuery($sql);
+      $dao->fetch();
+      $rows[$rowNum]['civicrm_event_registered_attended'] = $dao->count_result;
+      $rows[$rowNum]['civicrm_event_fee_to_be_invoiced'] = $dao->fee_result;
 
       // count the canceled and no-show participants
       $statusIDs = '3,4';
@@ -189,10 +201,12 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
 
       // count the invoiced participants
       $statusIDs = '16';
-      $sql = "select count(*) from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and 
+      $sql = "select count(*) count_result, ifnull(sum(ifnull(fee_amount, 0) - ifnull(discount_amount, 0)), 0) fee_result from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and 
         p.event_id = " . $row['civicrm_event_id'] . " and p.role_id = 1 and p.status_id = " . $statusIDs;
-      $count = CRM_Core_DAO::singleValueQuery($sql);
-      $rows[$rowNum]['civicrm_event_invoiced'] = $count;
+      $dao = CRM_Core_DAO::executeQuery($sql);
+      $dao->fetch();
+      $rows[$rowNum]['civicrm_event_invoiced'] = $dao->count_result;
+      $rows[$rowNum]['civicrm_event_fee_invoiced'] = $dao->fee_result;
     }
   }
 }
