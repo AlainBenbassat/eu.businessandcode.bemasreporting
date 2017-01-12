@@ -50,6 +50,20 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
               'to' => date('m/d/Y', time() + (86400 * 45)), // current date + 45 days
             ),
           ),
+          'event_type' => array(
+            'name' => 'event_type_id',
+            'title' => 'Evenementtype',
+            'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+            'options' => CRM_Core_OptionGroup::values('event_type'),
+          ),
+        ),
+      ),
+      'civicrm_event_custom' => array(
+        'filters' => array(
+          'volledige_afgehandeld_en_gefactu_79' => array(
+            'title' => 'Volledig afgehandeld en gefactureerd?',
+            'type' => CRM_Utils_Type::T_BOOLEAN,
+          ),
         ),
       ),
     );
@@ -89,7 +103,9 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
   }
 
   function from() {
-    $this->_from = " FROM  civicrm_event {$this->_aliases['civicrm_event']}  ";
+    $this->_from = " FROM  civicrm_event {$this->_aliases['civicrm_event']} 
+      LEFT OUTER JOIN civicrm_value_activiteit_status_25 {$this->_aliases['civicrm_event_custom']} 
+      ON {$this->_aliases['civicrm_event']}.id = {$this->_aliases['civicrm_event_custom']}.entity_id";
   }
 
   function where() {
