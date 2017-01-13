@@ -21,8 +21,10 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
       ts("Job Title") => "job_title",
       ts("Gender") => "gender_id",
       ts("Email") => "primary_email",
+      ts("Phone") => "primary_phone",
       ts("Function") => "custom_28",
       ts("BEMAS function") => "custom_29",
+      ts("Employer Phone") => "employer_phone",
       ts("Type of member contact") => "custom_60",
       ts("Type of activity (NACE)") => "custom_6",
       ts("Email Employer") => "employer_email",
@@ -40,7 +42,6 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
       ts("Postal Code") => "postal_code",
       ts("City") => "city",
       ts("Country") => "country_name",
-      ts("Phone") => "employer_phone",
       ts("Activity (en)") => "custom_4",
       ts("Activity (fr)") => "custom_5",
       ts("Activity (nl)") => "custom_3",
@@ -100,6 +101,7 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
       , contact_a.job_title as job_title
       , contact_a.gender_id as gender_id
       , contact_email.email as primary_email
+      , contact_phone.phone as primary_phone
       , civicrm_value_individual_details_19.function_28 as custom_28
       , civicrm_value_individual_details_19.bemas_function_29 as custom_29
       , civicrm_value_individual_details_19.types_of_member_contact_60 as custom_60
@@ -135,6 +137,8 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
         civicrm_contact contact_a
       LEFT OUTER JOIN        
         civicrm_email contact_email ON contact_a.id = contact_email.contact_id and contact_email.is_primary = 1
+      LEFT OUTER JOIN        
+        civicrm_phone contact_phone ON contact_a.id = contact_phone.contact_id and contact_phone.is_primary = 1
       LEFT OUTER JOIN
         civicrm_contact employer ON employer.id = contact_a.employer_id
       LEFT OUTER JOIN        
@@ -215,7 +219,7 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
     }
 
     if ($this->filterEmailOnHold == 1) {
-      $clause[] = "employer_email.on_hold = 1";
+      $clause[] = "contact_email.on_hold = 1";
     }
 
     // add ACL
