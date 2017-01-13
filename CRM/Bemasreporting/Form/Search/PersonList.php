@@ -8,6 +8,7 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
   private $filterLastName = '';
   private $filterMembership = 0;
   private $filterFunctionCode = array();
+  private $filterEmailOnHold = 0;
 
   function __construct(&$formValues) {
     parent::__construct($formValues);
@@ -64,6 +65,9 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
     // add BEMAS function code list (e.g. DIRPROD)
     $form->addSelect('custom_28', array('label' => ts('Function'), 'context' => 'search', 'multiple' => TRUE));
     $fields[] = 'custom_28';
+
+    $form->addYesNo('onhold', ts('On Hold?'));
+    $fields[] = 'onhold';
 
     $form->assign('elements', $fields);
   }
@@ -172,6 +176,7 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
     $this->filterLastName = CRM_Utils_Array::value('last_name', $this->_formValues);
     $this->filterMembership = CRM_Utils_Array::value('membership', $this->_formValues);
     $this->filterFunctionCode = CRM_Utils_Array::value('custom_28', $this->_formValues);
+    $this->filterEmailOnHold = CRM_Utils_Array::value('onhold', $this->_formValues);
 
     if ($this->filterFirstName) {
       $params[$count] = array($this->filterFirstName, 'String');
@@ -207,6 +212,10 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
       $clause[] = "civicrm_value_individual_details_19.function_28 IN ('"
         . implode("','", $this->filterFunctionCode)
         . "')";
+    }
+
+    if ($this->filterEmailOnHold == 1) {
+      $clause[] = "employer_email.on_hold = 1";
     }
 
     // add ACL
