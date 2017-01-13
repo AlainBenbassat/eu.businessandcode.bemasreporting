@@ -1,43 +1,19 @@
 <?php
 
 class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_Custom_Base implements CRM_Contact_Form_Search_Interface {
+  protected $_aclFrom = NULL;
+  protected $_aclWhere = NULL;
+
   private $filterFirstName = '';
   private $filterLastName = '';
+  private $filterMembership = 0;
+  private $filterFunctionCode = array();
 
   function __construct(&$formValues) {
     parent::__construct($formValues);
-  }
 
-  function buildForm(&$form) {
-    CRM_Utils_System::setTitle(ts('Contactenlijst (personen)'));
-
-    $fields = array();
-
-    $form->add('text', 'first_name', ts('First Name'), TRUE);
-    $fields[] = 'first_name';
-
-    $form->add('text', 'last_name', ts('Last Name'), TRUE);
-    $fields[] = 'last_name';
-
-    $stateProvince = array('' => ts('- any state/province -')) + CRM_Core_PseudoConstant::stateProvince();
-    $form->addElement('select', 'state_province_id', ts('State/Province'), $stateProvince);
-
-    // Optionally define default search values
-    $form->setDefaults(array(
-      'household_name' => '',
-      'state_province_id' => NULL,
-    ));
-
-    $form->assign('elements', $fields);
-  }
-
-  function summary() {
-    return NULL;
-  }
-
-  function &columns() {
-    // return by reference
-    $columns = array(
+    $this->_columns = array(
+      ts('Name') => 'sort_name',
       ts("Preferred Language") => "preferred_language",
       ts("First Name") => "first_name",
       ts("Last Name") => "last_name",
@@ -69,7 +45,31 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
       ts("Activity (nl)") => "custom_3",
       ts("Type of activity (NACE)") => "custom_6",
     );
-    return $columns;
+  }
+
+  function buildForm(&$form) {
+    CRM_Utils_System::setTitle(ts('Contactenlijst (personen)'));
+
+    $fields = array();
+
+    $form->add('text', 'first_name', ts('First Name'), TRUE);
+    $fields[] = 'first_name';
+
+    $form->add('text', 'last_name', ts('Last Name'), TRUE);
+    $fields[] = 'last_name';
+
+    $form->addYesNo('membership', ts('Lid van BEMAS?'));
+    $fields[] = 'membership';
+
+    // add BEMAS function code list (e.g. DIRPROD)
+    $form->addSelect('custom_28', array('label' => ts('Function'), 'context' => 'search', 'multiple' => TRUE));
+    $fields[] = 'custom_28';
+
+    $form->assign('elements', $fields);
+  }
+
+  public function contactIDs($offset = 0, $rowcount = 0, $sort = NULL, $returnSQL = FALSE) {
+    return $this->all($offset, $rowcount, $sort, FALSE, TRUE);
   }
 
   function all($offset = 0, $rowcount = 0, $sort = NULL, $includeContactIDs = FALSE, $justIDs = FALSE) {
@@ -80,13 +80,17 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
       $sql = $this->sql($this->select(), $offset, $rowcount, $sort, $includeContactIDs, NULL);
     }
 
-    // echo "$sql limit 0,5;";
+    //echo "$sql limit 0,5;"; exit;
+
     return $sql;
   }
 
   function select() {
     $selectFields = "
-      contact_a.preferred_language as preferred_language
+      contact_a.id as contact_id
+      , contact_a.sort_name
+      , contact_a.contact_type
+      , contact_a.preferred_language as preferred_language
       , contact_a.first_name as first_name
       , contact_a.last_name as last_name
       , contact_a.job_title as job_title
@@ -149,12 +153,16 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
         civicrm_value_organization_details_14 ON civicrm_value_organization_details_14.entity_id = employer.id
     ";
 
+    // add ACL
+    $this->buildACLClause('contact_a');
+    $from .= " {$this->_aclFrom} ";
+
     return $from;
   }
 
   function where($includeContactIDs = FALSE) {
     $params = array();
-    $where = "contact_a.contact_type = 'Individual'";
+    $where = "contact_a.contact_type = 'Individual' and contact_a.is_deleted = 0";
 
     $count  = 1;
     $clause = array();
@@ -162,15 +170,17 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
     // get the filters
     $this->filterFirstName = CRM_Utils_Array::value('first_name', $this->_formValues);
     $this->filterLastName = CRM_Utils_Array::value('last_name', $this->_formValues);
+    $this->filterMembership = CRM_Utils_Array::value('membership', $this->_formValues);
+    $this->filterFunctionCode = CRM_Utils_Array::value('custom_28', $this->_formValues);
 
     if ($this->filterFirstName) {
       $params[$count] = array($this->filterFirstName, 'String');
 
       if (strpos($this->filterFirstName, '%') === FALSE) {
-        $clause[] = "contact_a.first_name LIKE %{$count}";
+        $clause[] = "contact_a.first_name = %{$count}";
       }
       else {
-        $clause[] = "contact_a.first_name = %{$count}";
+        $clause[] = "contact_a.first_name LIKE %{$count}";
       }
 
       $count++;
@@ -180,30 +190,30 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
       $params[$count] = array($this->filterLastName, 'String');
 
       if (strpos($this->filterLastName, '%') === FALSE) {
-        $clause[] = "contact_a.last_name LIKE %{$count}";
+        $clause[] = "contact_a.last_name = %{$count}";
       }
       else {
-        $clause[] = "contact_a.last_name = %{$count}";
+        $clause[] = "contact_a.last_name LIKE %{$count}";
       }
 
       $count++;
     }
 
-    /*
-    $state = CRM_Utils_Array::value('state_province_id',
-      $this->_formValues
-    );
-    if (!$state &&
-      $this->_stateID
-    ) {
-      $state = $this->_stateID;
+    if ($this->filterMembership == 1) {
+      $clause[] = "exists (select * from civicrm_membership m where m.contact_id = contact_a.id and m.status_id in (1, 2, 3))";
     }
 
-    if ($state) {
-      $params[$count] = array($state, 'Integer');
-      $clause[] = "state_province.id = %{$count}";
+    if ($this->filterFunctionCode) {
+      $clause[] = "civicrm_value_individual_details_19.function_28 IN ('"
+        . implode("','", $this->filterFunctionCode)
+        . "')";
     }
-*/
+
+    // add ACL
+    if ($this->_aclWhere) {
+      $clause[] = "{$this->_aclWhere}";
+    }
+
     if (!empty($clause)) {
       $where .= ' AND ' . implode(' AND ', $clause);
     }
@@ -213,5 +223,9 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
 
   function templateFile() {
     return 'CRM/Contact/Form/Search/Custom.tpl';
+  }
+
+  public function buildACLClause($tableAlias = 'contact') {
+    list($this->_aclFrom, $this->_aclWhere) = CRM_Contact_BAO_Contact_Permission::cacheClause($tableAlias);
   }
 }
