@@ -418,7 +418,8 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       inner JOIN
         civicrm_value_individual_details_19 cd on c.id = cd.entity_id 
       where
-        m.join_date between '$year-01-01' and '$year-12-31'
+        m.start_date <= '$year-12-31'        
+        and m.end_date >= '$year-12-31'
         and c.contact_type = 'Individual'
         and c.is_deleted = 0
         and cd.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact', 'Mx - Ex-member contact')
