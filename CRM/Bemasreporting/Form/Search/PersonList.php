@@ -6,6 +6,7 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
 
   private $filterFirstName = '';
   private $filterLastName = '';
+  private $filterLanguage ='';
   private $filterMembership = 0;
   private $filterFunctionCode = array();
   private $filterEmailOnHold = 0;
@@ -69,6 +70,10 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
 
     $form->addYesNo('onhold', ts('On Hold?'));
     $fields[] = 'onhold';
+
+    $langOptions = array('NL' => 'Nederlands', 'FR' => 'Français', 'XX' => 'Other');
+    $form->add('select', 'language', ts('Language'), $langOptions);
+    $fields[] = 'language';
 
     $form->assign('elements', $fields);
   }
@@ -181,6 +186,7 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
     $this->filterMembership = CRM_Utils_Array::value('membership', $this->_formValues);
     $this->filterFunctionCode = CRM_Utils_Array::value('custom_28', $this->_formValues);
     $this->filterEmailOnHold = CRM_Utils_Array::value('onhold', $this->_formValues);
+    $this->filterLanguage = CRM_Utils_Array::value('language', $this->_formValues);
 
     if ($this->filterFirstName) {
       $params[$count] = array($this->filterFirstName, 'String');
@@ -220,6 +226,16 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
 
     if ($this->filterEmailOnHold == 1) {
       $clause[] = "contact_email.on_hold = 1";
+    }
+
+    if ($this->filterLanguage == 'NL') {
+      $clause[] = "contact_a.preferred_language in ('nl_NL', 'Dutch', 'Neder')";
+    }
+    else if ($this->filterLanguage == 'FR') {
+      $clause[] = "contact_a.preferred_language in ('fr_FR', 'Frenc', 'Franc')";
+    }
+    else if ($this->filterLanguage == 'XX') {
+      $clause[] = "ifnull(contact_a.preferred_language, 'XX') not in ('nl_NL', 'Dutch', 'Neder', 'fr_FR', 'Frenc', 'Franc')";
     }
 
     // add ACL

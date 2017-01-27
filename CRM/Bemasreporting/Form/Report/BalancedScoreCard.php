@@ -159,6 +159,15 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     }
     $rows[] = $row;
 
+    // NEW ROW
+    $row = array();
+    $row['civicrm_contact_column1'] = 'Individual members';
+    for ($i = self::NUMYEARS; $i >= 0; $i--) {
+      $y = $currentYear - $i;
+      $row['civicrm_contact_' . $y] = $this->getIndividualMembers($y);
+    }
+    $rows[] = $row;
+
     // BLANK ROW
     $row = array();
     $row['civicrm_contact_column1'] = '';
@@ -195,12 +204,39 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     }
     $rows[] = $row;
 
-    // NEW ROW
+    // BLANK ROW
     $row = array();
-    $row['civicrm_contact_column1'] = 'Admitted members';
+    $row['civicrm_contact_column1'] = '';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getAdmittedMembers($y);
+      $row['civicrm_contact_' . $y] = '';
+    }
+    $rows[] = $row;
+
+    // TITLE ROW
+    $row = array();
+    $row['civicrm_contact_column1'] = '<strong>Category of membership</strong>';
+    for ($i = self::NUMYEARS; $i >= 0; $i--) {
+      $y = $currentYear - $i;
+      $row['civicrm_contact_' . $y] = '';
+    }
+    $rows[] = $row;
+
+    // NEW ROW
+    $row = array();
+    $row['civicrm_contact_column1'] = 'Free members';
+    for ($i = self::NUMYEARS; $i >= 0; $i--) {
+      $y = $currentYear - $i;
+      $row['civicrm_contact_' . $y] = $this->getMemberCountByID($y, 10);
+    }
+    $rows[] = $row;
+
+    // NEW ROW
+    $row = array();
+    $row['civicrm_contact_column1'] = 'Honorary members';
+    for ($i = self::NUMYEARS; $i >= 0; $i--) {
+      $y = $currentYear - $i;
+      $row['civicrm_contact_' . $y] = $this->getMemberCountByID($y, 7);
     }
     $rows[] = $row;
 
@@ -210,6 +246,15 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
       $row['civicrm_contact_' . $y] = $this->getIndividualMembers($y);
+    }
+    $rows[] = $row;
+
+    // NEW ROW
+    $row = array();
+    $row['civicrm_contact_column1'] = 'Academic members';
+    for ($i = self::NUMYEARS; $i >= 0; $i--) {
+      $y = $currentYear - $i;
+      $row['civicrm_contact_' . $y] = $this->getMemberCountByID($y, 9);
     }
     $rows[] = $row;
 
@@ -305,6 +350,15 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
 
     // NEW ROW
     $row = array();
+    $row['civicrm_contact_column1'] = 'Other languages';
+    for ($i = self::NUMYEARS; $i >= 0; $i--) {
+      $y = $currentYear - $i;
+      $row['civicrm_contact_' . $y] = $this->getLanguageMemberOrganizations($y, 'other');
+    }
+    $rows[] = $row;
+
+    // NEW ROW
+    $row = array();
     $row['civicrm_contact_column1'] = 'Dutch speaking member contacts';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
@@ -318,6 +372,15 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
       $row['civicrm_contact_' . $y] = $this->getLanguageMemberContacts($y, 'FR');
+    }
+    $rows[] = $row;
+
+    // NEW ROW
+    $row = array();
+    $row['civicrm_contact_column1'] = 'Other languages';
+    for ($i = self::NUMYEARS; $i >= 0; $i--) {
+      $y = $currentYear - $i;
+      $row['civicrm_contact_' . $y] = $this->getLanguageMemberContacts($y, 'other');
     }
     $rows[] = $row;
 
@@ -365,7 +428,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
   private function getNewMemberContactCount($year) {
     $sql = "
       select
-        count(*)
+        count(distinct c.id)
       from
         civicrm_membership m
       inner JOIN 
@@ -373,10 +436,10 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       inner JOIN
         civicrm_value_individual_details_19 cd on c.id = cd.entity_id 
       where
-        m.join_date between '$year-01-01' and '$year-12-31'
+        m.start_date between '$year-01-01' and '$year-12-31'
         and c.contact_type = 'Individual'
         and c.is_deleted = 0
-        and cd.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact')
+        and cd.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact', 'Mx - Ex-member contact')
     ";
 
     $n = CRM_Core_DAO::singleValueQuery($sql);
@@ -384,9 +447,10 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
   }
 
   private function getTerminatedMemberContactCount($year) {
+    $previousYear = $year - 1;
     $sql = "
       select
-        count(*) * -1
+        count(distinct c.id) * -1
       from
         civicrm_membership m
       inner JOIN 
@@ -396,8 +460,8 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       inner JOIN
         civicrm_value_individual_details_19 cd on c.id = cd.entity_id 
       where
-        m.end_date between '$year-01-01' and '$year-12-31'
-        and s.name in ('Retired/Deceased', 'Terminated', 'Resigning', 'Bankrupt/Activity ceased', 'Cancelled')
+        m.end_date between '$previousYear-12-31' and '$year-12-30'
+        and s.name in ('Retired/Deceased', 'Terminated', 'Bankrupt/Activity ceased', 'Cancelled', 'Expired')
         and c.contact_type = 'Individual'
         and c.is_deleted = 0
         and cd.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact', 'Mx - Ex-member contact')
@@ -410,7 +474,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
   private function getTotalMemberContactCount($year) {
     $sql = "
       select
-        count(*)
+        count(distinct c.id)
       from
         civicrm_membership m
       inner JOIN 
@@ -432,15 +496,16 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
   private function getNewMemberOrganizationsCount($year) {
     $sql = "
       select
-        count(*)
+        count(distinct c.id)
       from
         civicrm_membership m
       inner JOIN 
         civicrm_contact c on m.contact_id = c.id
       where
-        m.join_date between '$year-01-01' and '$year-12-31'
+        m.start_date between '$year-01-01' and '$year-12-31'
         and m.owner_membership_id is null
         and c.is_deleted = 0
+        and c.contact_type = 'Organization'
     ";
 
     $n = CRM_Core_DAO::singleValueQuery($sql);
@@ -448,9 +513,10 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
   }
 
   private function getTerminatedMemberOrganizationsCount($year) {
+    $previousYear = $year - 1;
     $sql = "
       select
-        count(*) * -1
+        count(distinct c.id) * -1
       from
         civicrm_membership m
       inner JOIN 
@@ -458,10 +524,11 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       inner JOIN 
         civicrm_contact c on m.contact_id = c.id
       where
-        m.end_date between '$year-01-01' and '$year-12-31'
+        m.end_date between '$previousYear-12-31' and '$year-12-30'
         and m.owner_membership_id is null
-        and s.name in ('Retired/Deceased', 'Terminated', 'Resigning', 'Bankrupt/Activity ceased', 'Cancelled')
+        and s.name in ('Retired/Deceased', 'Terminated', 'Resigning', 'Bankrupt/Activity ceased', 'Cancelled', 'Expired')
         and c.is_deleted = 0      
+        and c.contact_type = 'Organization'
     ";
 
     $n = CRM_Core_DAO::singleValueQuery($sql);
@@ -471,7 +538,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
   private function getTotalMemberOrganizationsCount($year) {
     $sql = "
       select
-        count(*)
+        count(distinct c.id)
       from
         civicrm_membership m
       inner JOIN 
@@ -482,7 +549,32 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
         m.start_date <= '$year-12-31'        
         and m.end_date >= '$year-12-31'
         and m.owner_membership_id is null
-        and c.is_deleted = 0      
+        and c.is_deleted = 0    
+        and c.contact_type = 'Organization'
+    ";
+
+    $n = CRM_Core_DAO::singleValueQuery($sql);
+    return $n;
+  }
+
+  private function getAssociatedMembers($year) {
+    $sql = "
+      select
+        count(distinct c.id)
+      from
+        civicrm_membership m
+      inner JOIN 
+        civicrm_membership_type mt on m.membership_type_id = mt.id
+      inner JOIN 
+        civicrm_contact c on m.contact_id = c.id
+      inner JOIN 
+        civicrm_value_membership_15 mc on c.id = mc.entity_id
+      where
+        m.start_date <= '$year-12-31'        
+        and m.end_date >= '$year-12-31'
+        and m.owner_membership_id is null
+        and c.is_deleted = 0
+        and mc.membership_type_58 = 1
     ";
 
     $n = CRM_Core_DAO::singleValueQuery($sql);
@@ -490,10 +582,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
   }
 
   private function getEffectiveMembers($year) {
-    // 'Honorary' = 7, 'Individual membership' = 8, 'Free membership' = 10
     $sql = "
       select
-        count(*)
+        count(distinct c.id)
       from
         civicrm_membership m
       inner JOIN 
@@ -508,55 +599,6 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
         and m.owner_membership_id is null
         and c.is_deleted = 0
         and mc.membership_type_58 = 2
-        and m.membership_type_id not in (7, 8, 10)
-    ";
-
-    $n = CRM_Core_DAO::singleValueQuery($sql);
-    return $n;
-  }
-
-  private function getAssociatedMembers($year) {
-    // 'Honorary' = 7, 'Individual membership' = 8, 'Free membership' = 10
-    $sql = "
-      select
-        count(*)
-      from
-        civicrm_membership m
-      inner JOIN 
-        civicrm_contact c on m.contact_id = c.id
-      inner JOIN 
-        civicrm_value_membership_15 mc on c.id = mc.entity_id
-      where
-        m.start_date <= '$year-12-31'        
-        and m.end_date >= '$year-12-31'
-        and m.owner_membership_id is null
-        and c.is_deleted = 0
-        and mc.membership_type_58 = 1
-        and m.membership_type_id not in (7, 8, 10)
-    ";
-
-    $n = CRM_Core_DAO::singleValueQuery($sql);
-    return $n;
-  }
-
-  private function getAdmittedMembers($year) {
-    // 'Honorary' = 7, 'Free membership' = 10
-    $sql = "
-      select
-        count(*)
-      from
-        civicrm_membership m
-      inner JOIN 
-        civicrm_contact c on m.contact_id = c.id
-      inner JOIN 
-        civicrm_value_membership_15 mc on c.id = mc.entity_id
-      where
-        m.start_date <= '$year-12-31'        
-        and m.end_date >= '$year-12-31'
-        and m.owner_membership_id is null
-        and c.is_deleted = 0
-        and mc.membership_type_58 in (1, 2)
-        and m.membership_type_id in (7, 10)
     ";
 
     $n = CRM_Core_DAO::singleValueQuery($sql);
@@ -567,7 +609,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     // 'Individual membership' = 8
     $sql = "
       select
-        count(*)
+        count(distinct c.id)
       from
         civicrm_membership m
       inner JOIN 
@@ -577,7 +619,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
         and m.end_date >= '$year-12-31'
         and m.owner_membership_id is null
         and c.is_deleted = 0
-        and m.membership_type_id = 8
+        and c.contact_type = 'Individual'
     ";
 
     $n = CRM_Core_DAO::singleValueQuery($sql);
@@ -587,7 +629,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
   private function getMemberCountByID($year, $membershipTypeID) {
     $sql = "
       select
-        count(*)
+        count(distinct c.id)
       from
         civicrm_membership m
       inner JOIN 
@@ -606,10 +648,13 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
 
   private function getLanguageMemberOrganizations($year, $lang) {
     if ($lang == NL) {
-      $langList = "'nl_NL', 'Dutch', 'Neder'";
+      $langList = "in ('nl_NL', 'Dutch', 'Neder')";
     }
     else if ($lang == 'FR') {
-      $langList = "'fr_FR', 'Frenc', 'Franc'";
+      $langList = "in ('fr_FR', 'Frenc', 'Franc')";
+    }
+    else if ($lang == 'other') {
+      $langList = "not in ('nl_NL', 'Dutch', 'Neder', 'fr_FR', 'Frenc', 'Franc')";
     }
     else {
       return '';
@@ -618,35 +663,37 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     // get the total number of members
     $sql = "
       select
-        count(*)
+        count(distinct c.id)
       from
         civicrm_membership m
+      inner JOIN 
+        civicrm_membership_status s on m.status_id = s.id        
       inner JOIN 
         civicrm_contact c on m.contact_id = c.id
       where
         m.start_date <= '$year-12-31'        
         and m.end_date >= '$year-12-31'
         and m.owner_membership_id is null
-        and c.is_deleted = 0
+        and c.is_deleted = 0    
+        and c.contact_type = 'Organization'
     ";
-    $total = CRM_Core_DAO::singleValueQuery($sql);
 
     // add language clause
-    $sql .= " and c.preferred_language in ($langList)";
+    $sql .= " and c.preferred_language $langList";
     $n = CRM_Core_DAO::singleValueQuery($sql);
 
-    // calculate percentage
-    $percentage = round($n / $total * 100, 2);
-
-    return str_replace('.', ',', $percentage . '%');
+    return $n;
   }
 
   private function getLanguageMemberContacts($year, $lang) {
     if ($lang == NL) {
-      $langList = "'nl_NL', 'Dutch', 'Neder'";
+      $langList = "in ('nl_NL', 'Dutch', 'Neder')";
     }
     else if ($lang == 'FR') {
-      $langList = "'fr_FR', 'Frenc', 'Franc'";
+      $langList = "in ('fr_FR', 'Frenc', 'Franc')";
+    }
+    else if ($lang == 'other') {
+      $langList = "not in ('nl_NL', 'Dutch', 'Neder', 'fr_FR', 'Frenc', 'Franc')";
     }
     else {
       return '';
@@ -655,7 +702,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     // get the total number of member contacts
     $sql = "
       select
-        count(*)
+        count(distinct c.id)
       from
         civicrm_membership m
       inner JOIN 
@@ -668,8 +715,10 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
         and c.contact_type = 'Individual'
         and c.is_deleted = 0
         and cd.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact', 'Mx - Ex-member contact')
-        and c.preferred_language in ($langList)
     ";
+
+    // add language clause
+    $sql .= " and c.preferred_language $langList";
 
     $n = CRM_Core_DAO::singleValueQuery($sql);
 
