@@ -17,14 +17,12 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
     $this->_columns = array(
       ts('Name') => 'sort_name',
       ts("Preferred Language") => "preferred_language",
-      ts("First Name") => "first_name",
-      ts("Last Name") => "last_name",
+      ts("Organization Name") => "organization_name",
+      ts("Function") => "custom_28",
       ts("Job Title") => "job_title",
       ts("Gender") => "gender_id",
       ts("Email") => "primary_email",
       ts("Phone") => "primary_phone",
-      ts("Function") => "custom_28",
-      ts("BEMAS function") => "custom_29",
       ts("Employer Phone") => "employer_phone",
       ts("Type of member contact") => "custom_60",
       ts("Type of activity (NACE)") => "custom_6",
@@ -34,7 +32,8 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
       ts("Membership type") => "custom_58",
       ts("Number of additional member contacts") => "custom_15",
       ts("Total Number of member contacts") => "custom_16",
-      ts("Organization Name") => "organization_name",
+      ts("First Name") => "first_name",
+      ts("Last Name") => "last_name",
       ts("Category # employees of membership") => "custom_13",
       ts("Number of employees") => "custom_72",
       ts("Exact Online ID") => "custom_25",
@@ -43,10 +42,9 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
       ts("Postal Code") => "postal_code",
       ts("City") => "city",
       ts("Country") => "country_name",
-      ts("Activity (en)") => "custom_4",
+/*      ts("Activity (en)") => "custom_4",
       ts("Activity (fr)") => "custom_5",
-      ts("Activity (nl)") => "custom_3",
-      ts("Type of activity (NACE)") => "custom_6",
+      ts("Activity (nl)") => "custom_3",*/
     );
   }
 
