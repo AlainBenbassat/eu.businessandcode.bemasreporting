@@ -15,6 +15,7 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
     parent::__construct($formValues);
 
     $this->_columns = array(
+      ts('Contact ID') => 'contact_a.id',
       ts('Name') => 'sort_name',
       ts("Preferred Language") => "preferred_language",
       ts("Organization Name") => "organization_name",
@@ -30,8 +31,8 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
       ts("Authorized number of member contacts") => "custom_73",
       ts("Website") => "url",
       ts("Membership type") => "custom_58",
-      ts("Number of additional member contacts") => "custom_15",
-      ts("Total Number of member contacts") => "custom_16",
+      //ts("Number of additional member contacts") => "custom_15",
+      //ts("Total Number of member contacts") => "custom_16",
       ts("First Name") => "first_name",
       ts("Last Name") => "last_name",
       ts("Category # employees of membership") => "custom_13",
@@ -96,6 +97,7 @@ class CRM_Bemasreporting_Form_Search_PersonList extends CRM_Contact_Form_Search_
   function select() {
     $selectFields = "
       contact_a.id as contact_id
+      , contact_a.id
       , contact_a.sort_name
       , contact_a.contact_type
       , contact_a.preferred_language as preferred_language
