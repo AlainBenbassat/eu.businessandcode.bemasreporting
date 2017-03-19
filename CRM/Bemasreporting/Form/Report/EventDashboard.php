@@ -35,6 +35,11 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
             'required' => TRUE,
             'dbAlias' => '-1',
           ),
+          'to_be_invoiced' => array(
+            'title' => ts('Te factureren'),
+            'required' => TRUE,
+            'dbAlias' => '-1',
+          ),
           'invoiced' => array(
             'title' => ts('Gefactureerd'),
             'required' => TRUE,
@@ -181,31 +186,48 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
 
   function alterDisplay(&$rows) {
     foreach ($rows as $rowNum => $row) {
-      // change title in a hyperlink
+      // hyperlinks to event and participants
       $eventLink = CRM_Utils_System::baseURL() . 'civicrm/event/manage/settings?reset=1&action=update&id=' . $row['civicrm_event_id'];
+      $participantLink = CRM_Utils_System::baseURL() . 'civicrm/event/search?reset=1&force=1&status=true&event=' . $row['civicrm_event_id'];
+      $participantCancelledLink = CRM_Utils_System::baseURL() . 'civicrm/event/search?reset=1&force=1&status=false&event=' . $row['civicrm_event_id'];
+
+      // change title in a hyperlink
       $url = "<a href=\"$eventLink\">{$row['civicrm_event_title']}</a>";
       $rows[$rowNum]['civicrm_event_title'] = $url;
 
-      // count the registered participants (= everything but no show and cancel
+      // count the registered participants (= everything but no show and cancel)
       $statusIDs = '3,4';
-      $sql = "select count(*) count_result, ifnull(sum(ifnull(fee_amount, 0) - ifnull(discount_amount, 0)), 0) fee_result from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and 
+      $sql = "select count(*) from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and 
         p.event_id = " . $row['civicrm_event_id'] . " and p.status_id not in (" . $statusIDs . ")";
-      $dao = CRM_Core_DAO::executeQuery($sql);
-      $dao->fetch();
-      $rows[$rowNum]['civicrm_event_registered_attended'] = $dao->count_result;
-      $rows[$rowNum]['civicrm_event_fee_to_be_invoiced'] = $dao->fee_result;
+      $count = CRM_Core_DAO::singleValueQuery($sql);
+      $url = "<a href=\"$participantLink\">$count</a>";
+      $rows[$rowNum]['civicrm_event_registered_attended'] = $url;
 
       // count the canceled and no-show participants
       $statusIDs = '3,4';
       $sql = "select count(*) from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and 
         p.event_id = " . $row['civicrm_event_id'] . " and p.status_id in (" . $statusIDs . ")";
       $count = CRM_Core_DAO::singleValueQuery($sql);
-      $rows[$rowNum]['civicrm_event_cancel_noshow'] = $count;
+      $url = "<a href=\"$participantCancelledLink\">$count</a>";
+      $rows[$rowNum]['civicrm_event_cancel_noshow'] = $url;
+
+      // count the participants to be invoiced (exclude no show and cancel)
+      $statusIDs = '3,4';
+      $sql = "select count(*) count_result, ifnull(sum(ifnull(fee_amount, 0) - ifnull(discount_amount, 0)), 0) fee_result from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and 
+        p.event_id = " . $row['civicrm_event_id'] . " and p.status_id not in (" . $statusIDs . ")
+        and ifnull(fee_amount, 0) - ifnull(discount_amount, 0) > 0
+      ";
+      $dao = CRM_Core_DAO::executeQuery($sql);
+      $dao->fetch();
+      $rows[$rowNum]['civicrm_event_to_be_invoiced'] = $dao->count_result;
+      $rows[$rowNum]['civicrm_event_fee_to_be_invoiced'] = $dao->fee_result;
 
       // count the invoiced participants
       $statusIDs = '16';
       $sql = "select count(*) count_result, ifnull(sum(ifnull(fee_amount, 0) - ifnull(discount_amount, 0)), 0) fee_result from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and 
-        p.event_id = " . $row['civicrm_event_id'] . " and p.status_id = " . $statusIDs;
+        p.event_id = " . $row['civicrm_event_id'] . " and p.status_id = " . $statusIDs . "
+        and ifnull(fee_amount, 0) - ifnull(discount_amount, 0) > 0
+      ";
       $dao = CRM_Core_DAO::executeQuery($sql);
       $dao->fetch();
       $rows[$rowNum]['civicrm_event_invoiced'] = $dao->count_result;
