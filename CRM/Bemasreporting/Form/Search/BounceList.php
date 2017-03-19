@@ -18,7 +18,7 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
       ts("Organization Name") => "organization_name",
       ts("Email Employer") => "employer_email",
       ts("Phone") => "employer_phone",
-      ts('Member contact?') => "member_contact",
+      ts("Type of member contact") => "custom_60",
       ts("Prefix") => "prefix",
       ts('Name') => 'sort_name',
       ts("Job Title") => "job_title",
@@ -68,7 +68,7 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
       // little hack to change the default sort order
       $defaultSort = '`contact_a`.`id` asc';
       if ($sort->orderBy() == $defaultSort) {
-        $sql = str_replace($defaultSort, 'organization_name asc, member_contact desc', $sql);
+        $sql = str_replace($defaultSort, 'sort_field1, sort_field2, sort_field3, sort_field4', $sql);
       }
       //CRM_Core_Session::setStatus(print_r($sql, TRUE), 'info', 'info');
     }
@@ -79,13 +79,14 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
   }
 
   function select() {
+    $sortFields = $this->getSortFields();
+
     $selectFields = "
       contact_a.id as contact_id
       , contact_a.id
       , prf.label as prefix
       , contact_a.sort_name
       , contact_a.contact_type
-      , (select IF(count(m.id) = 0, 'N', 'Y') from civicrm_membership m where m.contact_id = contact_a.id and m.status_id in (1, 2, 3)) member_contact
       , substring(contact_a.preferred_language, -2) as preferred_language
       , contact_a.first_name as first_name
       , contact_a.last_name as last_name
@@ -95,7 +96,7 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
       , contact_phone.phone as primary_phone
       , civicrm_value_individual_details_19.function_28 as custom_28
       , civicrm_value_individual_details_19.bemas_function_29 as custom_29
-      , civicrm_value_individual_details_19.types_of_member_contact_60 as custom_60
+      , civicrm_value_individual_details_19.types_of_member_contact_60 as custom_60      
       , civicrm_value_activity_9.type_of_activity__nace__6 as custom_6
       , employer_email.email as employer_email
       , employer_country.name as country_name
@@ -105,7 +106,7 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
       , civicrm_value_membership_15.membership_type_58 as custom_58
       , civicrm_value_membership_15.number_of_additional_member_cont_15
       , civicrm_value_membership_15.total_number_of_member_contacts_16
-      , employer.organization_name as organization_name      
+      , employer.organization_name as organization_name            
       , civicrm_value_organization_details_14.category__employees_for_membersh_13 as custom_13
       , civicrm_value_organization_details_14.number_of_employees_72 as custom_72
       , civicrm_value_organization_details_14.popsy_id_25 as custom_25
@@ -117,6 +118,7 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
       , civicrm_value_activity_9.activity__en__4 as custom_4
       , civicrm_value_activity_9.activity__fr__5 as custom_5
       , civicrm_value_activity_9.type_of_activity__nace__6 as custom_6
+      , $sortFields
     ";
 
     return $selectFields;
@@ -239,5 +241,89 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
 
   public function buildACLClause($tableAlias = 'contact') {
     list($this->_aclFrom, $this->_aclWhere) = CRM_Contact_BAO_Contact_Permission::cacheClause($tableAlias);
+  }
+
+  private function getSortFields() {
+    // The field we are building here will define the sort order of the organizations.
+    // Because it is a field in the SQL statement that retrieves individuals, it is from that point of view
+    // that it is constructed.
+
+    // 1.
+    // Check if the employer of this contact has member contacts with email on hold.
+    // If the employer is NULL, we check if the person itself is a member contact.
+    // Result:
+    //   0 if primary member contact
+    //   1 if member contact
+    //   2 other
+    $field1 = "
+      if(
+        employer.id IS NULL
+        , if(
+            civicrm_value_individual_details_19.types_of_member_contact_60 = 'M1 - Primary member contact'
+            , '0'
+            , if(
+                civicrm_value_individual_details_19.types_of_member_contact_60 = 'MC - Member contact'
+                , '1'
+                , '2'
+              )
+          )
+        , if(
+            (SELECT COUNT(cbounce.id) FROM civicrm_contact cbounce INNER JOIN civicrm_email ebounce ON cbounce.id = ebounce.contact_id INNER JOIN civicrm_value_individual_details_19 cibounce ON cbounce.id = cibounce.`entity_id` WHERE ebounce.on_hold = 1 AND cbounce.is_deleted = 0 AND cbounce.employer_id = employer.id AND cibounce.types_of_member_contact_60 = 'M1 - Primary member contact') > 0
+            , '0'
+            , if(
+                (SELECT COUNT(cbounce.id) FROM civicrm_contact cbounce INNER JOIN civicrm_email ebounce ON cbounce.id = ebounce.contact_id INNER JOIN civicrm_value_individual_details_19 cibounce ON cbounce.id = cibounce.`entity_id` WHERE ebounce.on_hold = 1 AND cbounce.is_deleted = 0 AND cbounce.employer_id = employer.id AND cibounce.types_of_member_contact_60 = 'MC - Member contact') > 0
+                , '1'
+                , '2'
+              )
+          )
+      ) as sort_field1
+    ";
+
+    // 2.
+    // add the name of the organization at the end
+    $field2 = "
+       ifnull(employer.organization_name, '000')
+       as sort_field2
+    ";
+
+    // 3.
+    // Check if the person is a member contact
+    $field3 = "
+      if(
+            civicrm_value_individual_details_19.types_of_member_contact_60 = 'M1 - Primary member contact'
+            , '0'
+            , if(
+                civicrm_value_individual_details_19.types_of_member_contact_60 = 'MC - Member contact'
+                , '1'
+                , '2'
+              )
+      ) as sort_field3
+    ";
+
+    // 4.
+    // Check the function
+    $field4 = "
+      case ifnull(civicrm_value_individual_details_19.function_28, '')
+        when 'MNGR' then 1
+        when 'ASSET' then 1
+        when 'ENG' then 1
+        when 'FORM' then 1
+        when 'INTMNGR' then 1
+        when 'NRGY' then 1
+        when 'SHUT' then 1
+        when 'TECH' then 1
+        when 'AC' then 2
+        when 'BOARD' then 2
+        when 'CONS' then 2
+        when 'DIRPROD' then 2
+        when 'FSM' then 2
+        when 'RBI' then 2
+        when 'VAKPERS' then 2
+        when '' then 4
+        else 3
+      end as sort_field4
+    ";
+
+    return "$field1, $field2, $field3, $field4";
   }
 }
