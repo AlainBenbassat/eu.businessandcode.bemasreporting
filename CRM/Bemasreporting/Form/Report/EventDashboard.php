@@ -26,12 +26,12 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
             'required' => TRUE,
           ),
           'registered_attended' => array(
-            'title' => ts('Ingeschreven/Deelgenomen'),
+            'title' => ts('Ingeschreven<br>Deelgenomen'),
             'required' => TRUE,
             'dbAlias' => '-1',
           ),
           'cancel_noshow' => array(
-            'title' => ts('Niet gekomen/geannuleerd'),
+            'title' => ts('Afwezig<br>Geannuleerd'),
             'required' => TRUE,
             'dbAlias' => '-1',
           ),
