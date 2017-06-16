@@ -235,13 +235,13 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
   }
 
   function templateFile() {
-    return 'CRM/Contact/Form/Search/Custom.tpl';
+    // default = 'CRM/Contact/Form/Search/Custom.tpl'
+    return 'CRM/Bemasreporting/Form/Search/BounceList.tpl';
   }
 
   public function buildACLClause($tableAlias = 'contact') {
     list($this->_aclFrom, $this->_aclWhere) = CRM_Contact_BAO_Contact_Permission::cacheClause($tableAlias);
   }
-
 
   private function getSortFields() {
     // The field we are building here will define the sort order of the organizations.
