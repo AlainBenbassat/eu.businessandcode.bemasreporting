@@ -70,7 +70,7 @@ class CRM_Bemasreporting_Form_Report_BounceSummary extends CRM_Report_Form {
   }
 
   public function where() {
-    $this->_where = "WHERE id > 1  ";
+    $this->_where = "WHERE id < 2  ";
   }
 
   public function limit($rowCount = self::ROW_COUNT_LIMIT) {
@@ -115,7 +115,7 @@ class CRM_Bemasreporting_Form_Report_BounceSummary extends CRM_Report_Form {
     }
 
     $url  = CRM_Utils_System::url('civicrm/contact/search/custom', array('csid' => 17, 'reset'=> 1));
-    $rows[3 + $i]['civicrm_contact_types_of_member_contact_60'] = 'Totaal';
+    $rows[3 + $i]['civicrm_contact_types_of_member_contact_60'] = '<strong>Totaal</strong>';
     $rows[3 + $i]['civicrm_contact_lang_nl'] = $this->getNumBounces('', '', 'nl');
     $rows[3 + $i]['civicrm_contact_lang_fr'] = $this->getNumBounces('', '', 'fr');
     $rows[3 + $i]['civicrm_contact_lang_total'] = "<a href=\"$url\">" . $this->getNumBounces('', '', '') . "</a>";
