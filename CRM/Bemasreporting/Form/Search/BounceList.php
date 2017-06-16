@@ -47,7 +47,7 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
     $form->addSelect('custom_28', array('label' => ts('Function'), 'context' => 'search', 'multiple' => TRUE));
     $fields[] = 'custom_28';
 
-    $langOptions = array('NL' => 'Nederlands', 'FR' => 'Français', 'XX' => 'Other');
+    $langOptions = array('-' => '--', 'NL' => 'Nederlands', 'FR' => 'Français', 'XX' => 'Other');
     $form->add('select', 'language', ts('Language'), $langOptions);
     $fields[] = 'language';
 
@@ -70,10 +70,9 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
       if ($sort->orderBy() == $defaultSort) {
         $sql = str_replace($defaultSort, 'sort_field1, sort_field2, sort_field3, sort_field4', $sql);
       }
-      //CRM_Core_Session::setStatus(print_r($sql, TRUE), 'info', 'info');
     }
 
-    //echo "$sql limit 0,5;"; exit;
+    //echo $sql; exit;
 
     return $sql;
   }
@@ -243,6 +242,7 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
     list($this->_aclFrom, $this->_aclWhere) = CRM_Contact_BAO_Contact_Permission::cacheClause($tableAlias);
   }
 
+
   private function getSortFields() {
     // The field we are building here will define the sort order of the organizations.
     // Because it is a field in the SQL statement that retrieves individuals, it is from that point of view
@@ -251,51 +251,82 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
     // 1.
     // Check if the employer of this contact has member contacts with email on hold.
     // If the employer is NULL, we check if the person itself is a member contact.
+    //
+    // If there are no member contact with email on hold, we check if there are
+    // MNGR, TECH, ENG, ASSET, FSM, DIRPROD with email on hold
+    //
     // Result:
     //   0 if primary member contact
     //   1 if member contact
-    //   2 other
+    //   2 if MNGR
+    //   3 if TECH
+    //   4 if ENG
+    //   5 other
     $field1 = "
-      if(
+      if (
         employer.id IS NULL
-        , if(
+        , if (
             civicrm_value_individual_details_19.types_of_member_contact_60 = 'M1 - Primary member contact'
             , '0'
-            , if(
+            , if (
                 civicrm_value_individual_details_19.types_of_member_contact_60 = 'MC - Member contact'
                 , '1'
-                , '2'
+                , if (
+                    civicrm_value_individual_details_19.types_of_member_contact_60 = 'Mx - Ex-member contact'
+                    , '2'
+                    , '5'
+                )
               )
           )
-        , if(
-            (SELECT COUNT(cbounce.id) FROM civicrm_contact cbounce INNER JOIN civicrm_email ebounce ON cbounce.id = ebounce.contact_id INNER JOIN civicrm_value_individual_details_19 cibounce ON cbounce.id = cibounce.`entity_id` WHERE ebounce.on_hold = 1 AND cbounce.is_deleted = 0 AND cbounce.employer_id = employer.id AND cibounce.types_of_member_contact_60 = 'M1 - Primary member contact') > 0
-            , '0'
-            , if(
-                (SELECT COUNT(cbounce.id) FROM civicrm_contact cbounce INNER JOIN civicrm_email ebounce ON cbounce.id = ebounce.contact_id INNER JOIN civicrm_value_individual_details_19 cibounce ON cbounce.id = cibounce.`entity_id` WHERE ebounce.on_hold = 1 AND cbounce.is_deleted = 0 AND cbounce.employer_id = employer.id AND cibounce.types_of_member_contact_60 = 'MC - Member contact') > 0
-                , '1'
-                , '2'
+        , if (
+          (SELECT COUNT(cbounce.id) FROM civicrm_contact cbounce INNER JOIN civicrm_email ebounce ON cbounce.id = ebounce.contact_id INNER JOIN civicrm_value_individual_details_19 cibounce ON cbounce.id = cibounce.`entity_id` WHERE ebounce.on_hold = 1 AND cbounce.is_deleted = 0 AND cbounce.employer_id = employer.id AND cibounce.types_of_member_contact_60 = 'M1 - Primary member contact') > 0
+          , '0'
+          , if (
+            (SELECT COUNT(cbounce.id) FROM civicrm_contact cbounce INNER JOIN civicrm_email ebounce ON cbounce.id = ebounce.contact_id INNER JOIN civicrm_value_individual_details_19 cibounce ON cbounce.id = cibounce.`entity_id` WHERE ebounce.on_hold = 1 AND cbounce.is_deleted = 0 AND cbounce.employer_id = employer.id AND cibounce.types_of_member_contact_60 = 'MC - Member contact') > 0
+            , '1'
+            , if (
+              (SELECT COUNT(cbounce.id) FROM civicrm_contact cbounce INNER JOIN civicrm_email ebounce ON cbounce.id = ebounce.contact_id INNER JOIN civicrm_value_individual_details_19 cibounce ON cbounce.id = cibounce.`entity_id` WHERE ebounce.on_hold = 1 AND cbounce.is_deleted = 0 AND cbounce.employer_id = employer.id AND cibounce.types_of_member_contact_60 = 'Mx - Ex-member contact') > 0
+              , '2'
+              , if (
+                (SELECT COUNT(cbounce.id) FROM civicrm_contact cbounce INNER JOIN civicrm_email ebounce ON cbounce.id = ebounce.contact_id INNER JOIN civicrm_value_individual_details_19 cibounce ON cbounce.id = cibounce.`entity_id` WHERE ebounce.on_hold = 1 AND cbounce.is_deleted = 0 AND cbounce.employer_id = employer.id AND cibounce.function_28 = 'MNGR') > 0
+                , '3'
+                , if (
+                  (SELECT COUNT(cbounce.id) FROM civicrm_contact cbounce INNER JOIN civicrm_email ebounce ON cbounce.id = ebounce.contact_id INNER JOIN civicrm_value_individual_details_19 cibounce ON cbounce.id = cibounce.`entity_id` WHERE ebounce.on_hold = 1 AND cbounce.is_deleted = 0 AND cbounce.employer_id = employer.id AND cibounce.function_28 = 'TECH') > 0
+                  , '4'
+                  , if (
+                    (SELECT COUNT(cbounce.id) FROM civicrm_contact cbounce INNER JOIN civicrm_email ebounce ON cbounce.id = ebounce.contact_id INNER JOIN civicrm_value_individual_details_19 cibounce ON cbounce.id = cibounce.`entity_id` WHERE ebounce.on_hold = 1 AND cbounce.is_deleted = 0 AND cbounce.employer_id = employer.id AND cibounce.function_28 = 'ENG') > 0
+                    , '5'
+                    , '6'
+                  )
+                )
               )
+            )
           )
+        )
       ) as sort_field1
     ";
 
     // 2.
     // add the name of the organization at the end
     $field2 = "
-       ifnull(employer.organization_name, '000')
+       ifnull(employer.organization_name, 'zzz')
        as sort_field2
     ";
 
     // 3.
     // Check if the person is a member contact
     $field3 = "
-      if(
+      if (
             civicrm_value_individual_details_19.types_of_member_contact_60 = 'M1 - Primary member contact'
             , '0'
-            , if(
+            , if (
                 civicrm_value_individual_details_19.types_of_member_contact_60 = 'MC - Member contact'
                 , '1'
-                , '2'
+                , if (
+                  civicrm_value_individual_details_19.types_of_member_contact_60 = 'Mx - Ex-member contact'
+                  , '2'
+                  , '3'
+                )
               )
       ) as sort_field3
     ";
@@ -305,22 +336,22 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
     $field4 = "
       case ifnull(civicrm_value_individual_details_19.function_28, '')
         when 'MNGR' then 1
-        when 'ASSET' then 1
-        when 'ENG' then 1
-        when 'FORM' then 1
-        when 'INTMNGR' then 1
-        when 'NRGY' then 1
-        when 'SHUT' then 1
-        when 'TECH' then 1
-        when 'AC' then 2
-        when 'BOARD' then 2
-        when 'CONS' then 2
-        when 'DIRPROD' then 2
-        when 'FSM' then 2
-        when 'RBI' then 2
-        when 'VAKPERS' then 2
-        when '' then 4
-        else 3
+        when 'ASSET' then 2
+        when 'ENG' then 3
+        when 'FORM' then 4
+        when 'INTMNGR' then 5
+        when 'NRGY' then 6
+        when 'SHUT' then 7
+        when 'TECH' then 8
+        when 'AC' then 9
+        when 'BOARD' then 10
+        when 'CONS' then 11
+        when 'DIRPROD' then 12
+        when 'FSM' then 13
+        when 'RBI' then 14
+        when 'VAKPERS' then 15
+        when '' then 16
+        else 99
       end as sort_field4
     ";
 
