@@ -107,7 +107,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
 
     // NEW ROW
     $row = array();
-    $row['civicrm_contact_column1'] = 'Terminated (included transfers)';
+    $row['civicrm_contact_column1'] = 'Terminated member contacts (incl. transfers)';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
       $row['civicrm_contact_' . $y] = $this->getTerminatedMemberContactCount($y);
@@ -436,10 +436,10 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       inner JOIN
         civicrm_value_individual_details_19 cd on c.id = cd.entity_id 
       where
-        m.start_date between '$year-01-01' and '$year-12-31'
+        m.start_date between '$year-01-01' and '$year-12-30'
         and c.contact_type = 'Individual'
         and c.is_deleted = 0
-        and cd.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact', 'Mx - Ex-member contact')
+        and cd.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact')
     ";
 
     $n = CRM_Core_DAO::singleValueQuery($sql);
@@ -464,7 +464,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
         and s.name in ('Retired/Deceased', 'Terminated', 'Bankrupt/Activity ceased', 'Cancelled', 'Expired')
         and c.contact_type = 'Individual'
         and c.is_deleted = 0
-        and cd.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact', 'Mx - Ex-member contact')
+        and cd.types_of_member_contact_60 in ('Mx - Ex-member contact')
     ";
 
     $n = CRM_Core_DAO::singleValueQuery($sql);
@@ -486,7 +486,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
         and m.end_date >= '$year-12-31'
         and c.contact_type = 'Individual'
         and c.is_deleted = 0
-        and cd.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact', 'Mx - Ex-member contact')
+        and cd.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact')
     ";
 
     $n = CRM_Core_DAO::singleValueQuery($sql);
@@ -502,7 +502,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       inner JOIN 
         civicrm_contact c on m.contact_id = c.id
       where
-        m.start_date between '$year-01-01' and '$year-12-31'
+        m.start_date between '$year-01-01' and '$year-12-30'
         and m.owner_membership_id is null
         and c.is_deleted = 0
         and c.contact_type = 'Organization'
@@ -546,7 +546,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       inner JOIN 
         civicrm_contact c on m.contact_id = c.id
       where
-        m.start_date <= '$year-12-31'        
+        m.start_date <= '$year-12-30'        
         and m.end_date >= '$year-12-31'
         and m.owner_membership_id is null
         and c.is_deleted = 0    
@@ -570,7 +570,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       inner JOIN 
         civicrm_value_membership_15 mc on c.id = mc.entity_id
       where
-        m.start_date <= '$year-12-31'        
+        m.start_date <= '$year-12-30'        
         and m.end_date >= '$year-12-31'
         and m.owner_membership_id is null
         and c.is_deleted = 0
@@ -594,7 +594,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       inner JOIN 
         civicrm_value_membership_15 mc on c.id = mc.entity_id
       where
-        m.start_date <= '$year-12-31'        
+        m.start_date <= '$year-12-30'        
         and m.end_date >= '$year-12-31'
         and m.owner_membership_id is null
         and c.is_deleted = 0
@@ -615,7 +615,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       inner JOIN 
         civicrm_contact c on m.contact_id = c.id
       where
-        m.start_date <= '$year-12-31'        
+        m.start_date <= '$year-12-30'        
         and m.end_date >= '$year-12-31'
         and m.owner_membership_id is null
         and c.is_deleted = 0
