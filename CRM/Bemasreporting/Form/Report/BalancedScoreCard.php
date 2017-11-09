@@ -482,7 +482,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       inner JOIN
         civicrm_value_individual_details_19 cd on c.id = cd.entity_id 
       where
-        m.start_date <= '$year-12-31'        
+        m.start_date <= '$year-12-30'        
         and m.end_date >= '$year-12-31'
         and c.contact_type = 'Individual'
         and c.is_deleted = 0
@@ -635,7 +635,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       inner JOIN 
         civicrm_contact c on m.contact_id = c.id
       where
-        m.start_date <= '$year-12-31'        
+        m.start_date <= '$year-12-30'        
         and m.end_date >= '$year-12-31'
         and m.owner_membership_id is null
         and c.is_deleted = 0
@@ -671,7 +671,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       inner JOIN 
         civicrm_contact c on m.contact_id = c.id
       where
-        m.start_date <= '$year-12-31'        
+        m.start_date <= '$year-12-30'        
         and m.end_date >= '$year-12-31'
         and m.owner_membership_id is null
         and c.is_deleted = 0    
@@ -710,7 +710,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       inner JOIN
         civicrm_value_individual_details_19 cd on c.id = cd.entity_id 
       where
-        m.start_date <= '$year-12-31'        
+        m.start_date <= '$year-12-30'        
         and m.end_date >= '$year-12-31'
         and c.contact_type = 'Individual'
         and c.is_deleted = 0
@@ -736,7 +736,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       inner JOIN 
         civicrm_value_activity_9 ac on c.id = ac.entity_id
       where
-        m.start_date <= '$year-12-31'        
+        m.start_date <= '$year-12-30'        
         and m.end_date >= '$year-12-31'
         and m.owner_membership_id is null
         and c.is_deleted = 0
@@ -758,7 +758,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       inner JOIN 
         civicrm_value_activity_9 ac on c.id = ac.entity_id
       where
-        m.start_date <= '$year-12-31'        
+        m.start_date <= '$year-12-30'        
         and m.end_date >= '$year-12-31'
         and m.owner_membership_id is null
         and c.is_deleted = 0
