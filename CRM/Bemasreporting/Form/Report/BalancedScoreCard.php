@@ -714,7 +714,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
         and m.end_date >= '$year-12-31'
         and c.contact_type = 'Individual'
         and c.is_deleted = 0
-        and cd.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact', 'Mx - Ex-member contact')
+        and cd.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact')
     ";
 
     // add language clause
