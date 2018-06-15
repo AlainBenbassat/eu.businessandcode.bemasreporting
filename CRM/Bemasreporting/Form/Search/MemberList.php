@@ -100,9 +100,8 @@ class CRM_Bemasreporting_Form_Search_MemberList extends CRM_Contact_Form_Search_
     $params = array();
 
     $where = "
-      contact_a.contact_type = 'Organization'
-      and m.owner_membership_id IS NULL
-      and m.status_id = 1
+      m.owner_membership_id IS NULL
+      and m.status_id = 2
     ";
 
     return $this->whereClause($where, $params);
