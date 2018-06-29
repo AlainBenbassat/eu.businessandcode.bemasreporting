@@ -62,7 +62,7 @@ class CRM_Bemasreporting_Form_Search_MemberList extends CRM_Contact_Form_Search_
       , ctry.name country_name
       , p.phone
       , e.email
-      , w.url
+      , '' url
       , act.activity__nl__3 description_nl
       , act.activity__en__4 description_en
       , act.activity__fr__5 description_fr      
@@ -87,8 +87,6 @@ class CRM_Bemasreporting_Form_Search_MemberList extends CRM_Contact_Form_Search_
         civicrm_email e on e.contact_id = contact_a.id and e.is_primary = 1
       left outer join 
         civicrm_phone p on p.contact_id = contact_a.id and p.is_primary = 1
-      left outer join 
-        civicrm_website w on w.contact_id = contact_a.id
       left outer join 
         civicrm_value_activity_9 act on act.entity_id = contact_a.id
       left outer join
@@ -148,5 +146,32 @@ class CRM_Bemasreporting_Form_Search_MemberList extends CRM_Contact_Form_Search_
     }
 
     $row['member_contacts'] = implode('|', $contactList);
+
+    // get the website (we do it here, because there can be more than one)
+    $sql = "
+      SELECT
+        *
+      FROM
+        civicrm_website
+      WHERE
+        contact_id = %1
+    ";
+    $sqlParams = [
+      1 => [$row['contact_id'], 'Integer'],
+    ];
+
+    $dao = CRM_Core_DAO::executeQuery($sql, $sqlParams);
+    $row['url'] = '';
+    while ($dao->fetch()) {
+      // fill in the first one, maybe it will be overwritten by one of type 'main'
+      if ($row['url'] == '') {
+        $row['url'] = $dao->url;
+      }
+
+      if ($dao->website_type_id == 6) {
+        $row['url'] = $dao->url;
+        break;
+      }
+    }
   }
 }
