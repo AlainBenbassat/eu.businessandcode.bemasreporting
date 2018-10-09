@@ -138,7 +138,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
         civicrm_participant p
       ON
         {$this->_aliases['civicrm_contact']}.id = p.contact_id 
-        AND p.role_id = 1 and p.status_id in (1, 2) 
+        AND p.role_id = 1 and p.status_id in (1, 2, 5) 
     ";
   }
 
@@ -272,7 +272,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
         civicrm_contact c on p.contact_id = c.id
       where
         role_id = $roleID and event_id = $eventID
-        and status_id in (1, 2)
+        and status_id in (1, 2, 5)
       order by
         sort_name
     ";
