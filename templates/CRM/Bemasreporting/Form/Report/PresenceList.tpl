@@ -26,7 +26,7 @@
         {*include the table layout*}
         {*include file="CRM/Report/Form/Layout/Table.tpl"*}
         {assign var="bemasTableStyle" value="border-collapse: collapse; font-family: Arial Narrow; border: none"}
-        {assign var="bemasColHeaderStyle" value="text-align: left; border-top: 1px solid #000000; border-bottom: 1px solid #000000; padding-left: 10px; padding-right: 10px; background-color: #1a6c86; color: #FFFFFF"}
+        {assign var="bemasColHeaderStyle" value="text-align: left; border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #FFFFFF; border-right: 1px solid #FFFFFF; padding-left: 10px; padding-right: 10px; background-color: #1a6c86; color: #FFFFFF"}
         {assign var="bemasCellStyle" value="border-bottom: 1px solid #000000; padding-left: 10px; padding-right: 10px;"}
 
         {include file="CRM/Bemasreporting/Form/Report/PresenceListRows.tpl"}
