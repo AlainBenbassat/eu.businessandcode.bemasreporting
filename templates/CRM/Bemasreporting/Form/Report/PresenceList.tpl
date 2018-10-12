@@ -25,7 +25,7 @@
 
         {*include the table layout*}
         {*include file="CRM/Report/Form/Layout/Table.tpl"*}
-        {assign var="bemasTableStyle" value="border-collapse: collapse; font-family: Arial Narrow"}
+        {assign var="bemasTableStyle" value="border-collapse: collapse; font-family: Arial Narrow; border: none"}
         {assign var="bemasColHeaderStyle" value="text-align: left; border-top: 1px solid #000000; border-bottom: 1px solid #000000; padding-left: 10px; padding-right: 10px; background-color: #1a6c86; color: #FFFFFF"}
         {assign var="bemasCellStyle" value="border-bottom: 1px solid #000000; padding-left: 10px; padding-right: 10px;"}
 
@@ -43,6 +43,6 @@
 {/if}
 
 <!-- footer on every page -->
-<div style="position: fixed; left: 0; bottom: -1.6em; font-size: 10px; line-height: 1.8;">
+<div style="width: 100%; position: fixed; left: 0; bottom: -1.6em; font-size: 10px; line-height: 1.8; text-align: center">
     <p>{$eventDate} - {$eventTitle}</p>
 </div>

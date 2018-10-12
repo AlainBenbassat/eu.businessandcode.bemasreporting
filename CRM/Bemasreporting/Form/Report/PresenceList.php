@@ -62,12 +62,12 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
             'required' => TRUE,
           ),
           'newsletter' => array(
-            'title' => 'Ontvangt graag BEMAS nieuwsbrief',
+            'title' => 'Ontvangt graag<br>BEMAS nieuwsbrief',
             'required' => TRUE,
             'dbAlias' => "'&nbsp;Ja&nbsp;&nbsp;|&nbsp;&nbsp;Nee&nbsp;'",
           ),
           'sharecontact' => array(
-            'title' => 'Toestemming voor delen<br>contactgegevens met derden (bv. spreker)',
+            'title' => 'Toestemming voor delen<br>contactgegevens met<br>derden (bv. spreker)',
             'required' => TRUE,
             'dbAlias' => "'&nbsp;Ja&nbsp;&nbsp;|&nbsp;&nbsp;Nee&nbsp;'",
           ),
@@ -117,13 +117,13 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
     $this->translations['organization_name']['fr'] = 'Employeur';
     $this->translations['organization_name']['en'] = 'Employer';
 
-    $this->translations['newsletter']['nl'] = 'Ontvangt graag BEMAS nieuwsbrief';
-    $this->translations['newsletter']['fr'] = 'Recevoir la BEMAS newsletter?';
-    $this->translations['newsletter']['en'] = 'Receive BEMAS newsletter?';
+    $this->translations['newsletter']['nl'] = 'Ontvangt graag<br>BEMAS nieuwsbrief';
+    $this->translations['newsletter']['fr'] = 'Recevoir la<br>BEMAS newsletter?';
+    $this->translations['newsletter']['en'] = 'Receive<br>BEMAS newsletter?';
 
-    $this->translations['sharecontact']['nl'] = 'Toestemming voor delen<br>contactgegevens met derden (bv. spreker)';
-    $this->translations['sharecontact']['fr'] = 'Permission de partager<br>mes données avec partenaires (p.ex. orateur)';
-    $this->translations['sharecontact']['en'] = 'Permission to share<br>my date with partners (e.g. speaker)';
+    $this->translations['sharecontact']['nl'] = 'Toestemming voor delen<br>contactgegevens met derden<br>(bv. spreker)';
+    $this->translations['sharecontact']['fr'] = 'Permission de partager<br>mes données avec<br>partenaires (p.ex. orateur)';
+    $this->translations['sharecontact']['en'] = 'Permission to share<br>my data with partners<br>(e.g. speaker)';
 
     $this->translations['signature']['nl'] = 'Handtekening';
     $this->translations['signature']['fr'] = 'Signature';
