@@ -5,7 +5,7 @@ require_once 'bemasreporting.civix.php';
 function bemasreporting_civicrm_searchTasks($objectType, &$tasks) {
   if ($objectType == 'event') {
     $tasks[] = [
-      'title' => 'Intekenlijst',
+      'title' => 'Intekenlijst / Liste de présences',
       'class' => 'CRM_Bemasreporting_Task_ShowPresenceList', //'CRM_Bemasreporting_Form_Report_PresenceList',
     ];
   }

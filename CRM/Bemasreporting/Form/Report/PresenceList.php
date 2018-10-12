@@ -273,13 +273,13 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
     }
     else if ($roleID == 4) {
       if ($lang == 'nl') {
-        $label = 'Spreker(s): ';
+        $label = 'Spreker(s)/lesgever(s): ';
       }
       else if ($lang == 'fr') {
-        $label = 'Orateur(s): ';
+        $label = 'Orateur(s)/formateur(s): ';
       }
       else {
-        $label = 'Speaker(s): ';
+        $label = 'Speaker(s)/trainer(s): ';
       }
     }
 

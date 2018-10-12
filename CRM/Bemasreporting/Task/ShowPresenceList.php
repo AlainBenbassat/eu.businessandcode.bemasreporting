@@ -47,6 +47,7 @@ class CRM_Bemasreporting_Task_ShowPresenceList extends CRM_Event_Form_Task {
       $queryParams[] = 'event_id=' . $event_id;
     }
 
+    // redirect to the presence report instance (i.e. id = 61)
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/report/instance/61', implode('&', $queryParams)));
   }
 
