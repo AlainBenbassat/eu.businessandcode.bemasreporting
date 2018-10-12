@@ -5,6 +5,38 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
   private $translations = [];
 
   function __construct() {
+    // see if we have an event id
+    // this could be from a search action
+    $event_id = 0;
+
+    // step 1: check if we have event= in the entryURL of the session
+    $session = CRM_Core_Session::singleton();
+    $entryURL = $session->get('entryURL');
+    if (strpos($entryURL, '&amp;event=')) {
+      $urlParts = explode('&amp;', $entryURL);
+      foreach ($urlParts as $urlPart) {
+        $splitUrlPart = explode('=', $urlPart);
+        if ($splitUrlPart[0] == 'event') {
+          $event_id = $splitUrlPart[1];
+          break;
+        }
+      }
+    }
+    else {
+      // step 2: no event id in the url, check previous search in session
+      $allVars = [];
+      $session->getVars($allVars);
+      foreach ($allVars as $sessionKey => $sessionValue) {
+        if (strpos($sessionKey, 'CRM_Event_Controller_Search_') !== false) {
+          if (array_key_exists('formValues', $sessionValue)) {
+            if (array_key_exists('event_id', $sessionValue['formValues'])) {
+              $event_id = $sessionValue['formValues']['event_id'];
+            }
+          }
+        }
+      }
+    }
+
     $this->_columns = array(
       'civicrm_contact' => array(
         'dao' => 'CRM_Contact_DAO_Contact',
@@ -50,7 +82,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
             'title' => ts('Event'),
             'type' => CRM_Utils_Type::T_INT,
             'operatorType' => CRM_Report_Form::OP_SELECT,
-            'options' => $this->getEventList(),
+            'options' => $this->getEventList($event_id),
             'required' => TRUE,
           ),
           'language' => array(
@@ -64,6 +96,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
       )
     );
 
+    // set translations
     $this->translations['id']['nl'] = 'id';
     $this->translations['id']['fr'] = 'id';
     $this->translations['id']['en'] = 'id';
@@ -210,7 +243,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
     }
   }
 
-  function getEventList() {
+  function getEventList($event_id) {
     $eventList = [];
 
     $sql = "
@@ -224,10 +257,21 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
       FROM
         civicrm_event
       WHERE
+    ";
+
+    if ($event_id > 0) {
+      // we have a default event, select it
+      $sql .= " id = $event_id";
+    }
+    else {
+      // select all events
+      $sql .= "
         start_date >= DATE_FORMAT(now(), '%Y-%m-%d')
       ORDER BY
         start_date
-    ";
+      ";
+    }
+
     $dao = CRM_Core_DAO::executeQuery($sql);
 
     while ($dao->fetch()) {
