@@ -6,35 +6,11 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
 
   function __construct() {
     // see if we have an event id
-    // this could be from a search action
-    $event_id = 0;
-
-    // step 1: check if we have event= in the entryURL of the session
-    $session = CRM_Core_Session::singleton();
-    $entryURL = $session->get('entryURL');
-    if (strpos($entryURL, '&amp;event=')) {
-      $urlParts = explode('&amp;', $entryURL);
-      foreach ($urlParts as $urlPart) {
-        $splitUrlPart = explode('=', $urlPart);
-        if ($splitUrlPart[0] == 'event') {
-          $event_id = $splitUrlPart[1];
-          break;
-        }
-      }
+    if (($event_id = CRM_Utils_Request::retrieve('event_id', 'Positive'))) {
+       // OK, found in the url
     }
     else {
-      // step 2: no event id in the url, check previous search in session
-      $allVars = [];
-      $session->getVars($allVars);
-      foreach ($allVars as $sessionKey => $sessionValue) {
-        if (strpos($sessionKey, 'CRM_Event_Controller_Search_') !== false) {
-          if (array_key_exists('formValues', $sessionValue)) {
-            if (array_key_exists('event_id', $sessionValue['formValues'])) {
-              $event_id = $sessionValue['formValues']['event_id'];
-            }
-          }
-        }
-      }
+      $event_id = 0;
     }
 
     $this->_columns = array(
