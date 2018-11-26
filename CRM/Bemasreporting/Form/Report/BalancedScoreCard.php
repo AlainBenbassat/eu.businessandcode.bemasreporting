@@ -867,10 +867,12 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       // remove html stuff
       $multiValues = str_replace('<br />', '\n', $multiValues);
       $multiValues = str_replace('<br>', '\n', $multiValues);
-      $multiValues = str_replace('<p>', '\n', $multiValues);
+      $multiValues = str_replace('<p>', '', $multiValues);
       $multiValues = str_replace('</p>', '\n', $multiValues);
       $multiValues = str_replace('\n\n', '\n', $multiValues);
       $multiValues = str_replace('\n\n', '\n', $multiValues);
+      $multiValues = str_replace('\n ', '\n', $multiValues);
+      $multiValues = str_replace('\n \n', '\n', $multiValues);
       if ($multiValues) {
         $valueArr = explode("\n", $multiValues);
         foreach ($valueArr as $valueString) {
