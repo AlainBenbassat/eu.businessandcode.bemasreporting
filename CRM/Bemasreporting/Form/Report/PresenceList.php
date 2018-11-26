@@ -152,7 +152,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
   }
 
   function where() {
-    $this->_where = " WHERE event_id = " . $this->_params['event_value'];
+    $this->_where = " WHERE {$this->_aliases['civicrm_contact']}.is_deleted = 0 and {$this->_aliases['civicrm_contact']}.is_deceased = 0 and event_id = " . $this->_params['event_value'];
 
     if ($this->_aclWhere) {
       $this->_where .= " AND {$this->_aclWhere} ";
