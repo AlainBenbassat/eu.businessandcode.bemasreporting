@@ -865,20 +865,25 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       $multiValues = CRM_Core_DAO::singleValueQuery($sql, $sqlParams);
 
       // remove html stuff
-      $multiValues = str_replace('<br />', '\n', $multiValues);
-      $multiValues = str_replace('<br>', '\n', $multiValues);
+      $multiValues = str_replace('<br />', '|', $multiValues);
+      $multiValues = str_replace('<br>', '|', $multiValues);
       $multiValues = str_replace('<p>', '', $multiValues);
-      $multiValues = str_replace('</p>', '\n', $multiValues);
-      $multiValues = str_replace('\n\n', '\n', $multiValues);
-      $multiValues = str_replace('\n\n', '\n', $multiValues);
-      $multiValues = str_replace('\n ', '\n', $multiValues);
-      $multiValues = str_replace('\n \n', '\n', $multiValues);
+      $multiValues = str_replace('</p>', '|', $multiValues);
+      $multiValues = str_replace('&gt;', '>', $multiValues);
+      $multiValues = str_replace("|\n", "\n", $multiValues);
+
       if ($multiValues) {
+        // split the string on the newline character
         $valueArr = explode("\n", $multiValues);
+
+        // check all lines
         foreach ($valueArr as $valueString) {
-          $splittedValue = explode('=', $valueString);
-          if (count($splittedValue) == 2) {
-            $this->storedValues[$y][trim($splittedValue[0])] = trim($splittedValue[1]);
+          // ignore the line if we don't have an equal sign
+          if (strpos($valueString, '=') !== FALSE) {
+            $splittedValue = explode('=', $valueString);
+            if (count($splittedValue) == 2) {
+              $this->storedValues[$y][trim($splittedValue[0])] = trim($splittedValue[1]);
+            }
           }
         }
       }
