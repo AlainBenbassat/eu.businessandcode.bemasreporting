@@ -147,7 +147,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
         civicrm_participant p
       ON
         {$this->_aliases['civicrm_contact']}.id = p.contact_id 
-        AND p.role_id = 1 and p.status_id <> (4,7,8,9,10,11,12) 
+        AND p.role_id = 1 and p.status_id not in (4,7,8,9,10,11,12) 
     ";
   }
 
