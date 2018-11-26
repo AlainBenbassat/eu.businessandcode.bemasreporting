@@ -856,6 +856,8 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
           option_group_id = %1
         and 
           name = %2
+        and 
+          is_active = 1
       ";
       $sqlParams = [
         1 => [$this->storeValuesOptionGroupID, 'Integer'],
