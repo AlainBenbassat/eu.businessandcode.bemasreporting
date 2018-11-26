@@ -3,6 +3,8 @@
 class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
   protected $_summary = NULL;
   const NUMYEARS = 5;
+  private $storeValuesOptionGroupID = 0;
+  private $storedValues = [];
 
   function __construct() {
     $this->_columns = array(
@@ -17,6 +19,11 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
       ),
     );
 
+    // get the option group with stored values
+    $sql = "select id from civicrm_option_group where name = 'balanced_score_card'";
+    $this->storeValuesOptionGroupID = CRM_Core_DAO::singleValueQuery($sql);
+
+
     // add years
     $currentYear = date('Y');
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
@@ -26,6 +33,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
         'required' => TRUE,
         'dbAlias' => '1',
       );
+
+      // get stored values for that year
+      $this->getStoredBalancedScoreCard($y);
     }
 
     parent::__construct();
@@ -101,7 +111,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'New member contacts this period';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getNewMemberContactCount($y);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getNewMemberContactCount($y);
     }
     $rows[] = $row;
 
@@ -110,7 +122,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Terminated member contacts (incl. transfers)';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getTerminatedMemberContactCount($y);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getTerminatedMemberContactCount($y);
     }
     $rows[] = $row;
 
@@ -119,7 +133,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Total number of member contacts';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getTotalMemberContactCount($y);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getTotalMemberContactCount($y);
     }
     $rows[] = $row;
 
@@ -137,7 +153,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'New member companies this period';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getNewMemberOrganizationsCount($y);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getNewMemberOrganizationsCount($y);
     }
     $rows[] = $row;
 
@@ -146,7 +164,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Number of member companies terminated';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getTerminatedMemberOrganizationsCount($y);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getTerminatedMemberOrganizationsCount($y);
     }
     $rows[] = $row;
 
@@ -155,7 +175,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Total number of member companies';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getTotalMemberOrganizationsCount($y);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getTotalMemberOrganizationsCount($y);
     }
     $rows[] = $row;
 
@@ -164,7 +186,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Individual members';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getIndividualMembers($y);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getIndividualMembers($y);
     }
     $rows[] = $row;
 
@@ -191,7 +215,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Effective members';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getEffectiveMembers($y);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getEffectiveMembers($y);
     }
     $rows[] = $row;
 
@@ -200,7 +226,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Associated members';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getAssociatedMembers($y);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getAssociatedMembers($y);
     }
     $rows[] = $row;
 
@@ -227,7 +255,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Free members';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getMemberCountByID($y, 10);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getMemberCountByID($y, 10);
     }
     $rows[] = $row;
 
@@ -236,7 +266,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Honorary members';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getMemberCountByID($y, 7);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getMemberCountByID($y, 7);
     }
     $rows[] = $row;
 
@@ -245,7 +277,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Individual members';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getIndividualMembers($y);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getIndividualMembers($y);
     }
     $rows[] = $row;
 
@@ -254,7 +288,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Academic members';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getMemberCountByID($y, 9);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getMemberCountByID($y, 9);
     }
     $rows[] = $row;
 
@@ -263,7 +299,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Membership [1-20]';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getMemberCountByID($y, 1);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getMemberCountByID($y, 1);
     }
     $rows[] = $row;
 
@@ -272,7 +310,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Membership [21-50]';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getMemberCountByID($y, 2);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getMemberCountByID($y, 2);
     }
     $rows[] = $row;
 
@@ -281,7 +321,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Membership [51-100]';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getMemberCountByID($y, 3);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getMemberCountByID($y, 3);
     }
     $rows[] = $row;
 
@@ -290,7 +332,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Membership [101-500]';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getMemberCountByID($y, 4);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getMemberCountByID($y, 4);
     }
     $rows[] = $row;
 
@@ -299,7 +343,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Membership [501-1000]';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getMemberCountByID($y, 5);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getMemberCountByID($y, 5);
     }
     $rows[] = $row;
 
@@ -308,7 +354,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Membership [>1000]';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getMemberCountByID($y, 6);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getMemberCountByID($y, 6);
     }
     $rows[] = $row;
 
@@ -335,7 +383,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Dutch speaking member companies';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getLanguageMemberOrganizations($y, 'NL');
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getLanguageMemberOrganizations($y, 'NL');
     }
     $rows[] = $row;
 
@@ -344,7 +394,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'French speaking member companies';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getLanguageMemberOrganizations($y, 'FR');
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getLanguageMemberOrganizations($y, 'FR');
     }
     $rows[] = $row;
 
@@ -353,7 +405,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Other languages';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getLanguageMemberOrganizations($y, 'other');
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getLanguageMemberOrganizations($y, 'other');
     }
     $rows[] = $row;
 
@@ -362,7 +416,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Dutch speaking member contacts';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getLanguageMemberContacts($y, 'NL');
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getLanguageMemberContacts($y, 'NL');
     }
     $rows[] = $row;
 
@@ -371,16 +427,20 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'French speaking member contacts';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getLanguageMemberContacts($y, 'FR');
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getLanguageMemberContacts($y, 'FR');
     }
     $rows[] = $row;
 
     // NEW ROW
     $row = array();
-    $row['civicrm_contact_column1'] = 'Other languages';
+    $row['civicrm_contact_column1'] = 'Other languages member contacts';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getLanguageMemberContacts($y, 'other');
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getLanguageMemberContacts($y, 'other');
     }
     $rows[] = $row;
 
@@ -407,7 +467,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Asset owners';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getAssetOwners($y);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getAssetOwners($y);
     }
     $rows[] = $row;
 
@@ -416,7 +478,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     $row['civicrm_contact_column1'] = 'Non-asset owners';
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
-      $row['civicrm_contact_' . $y] = $this->getNonAssetOwners($y);
+
+      $storedVal = $this->getStoredBCValue($row['civicrm_contact_column1'], $y);
+      $row['civicrm_contact_' . $y] = $storedVal ? $storedVal : $this->getNonAssetOwners($y);
     }
     $rows[] = $row;
   }
@@ -647,7 +711,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
   }
 
   private function getLanguageMemberOrganizations($year, $lang) {
-    if ($lang == NL) {
+    if ($lang == 'NL') {
       $langList = "in ('nl_NL', 'Dutch', 'Neder')";
     }
     else if ($lang == 'FR') {
@@ -686,7 +750,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
   }
 
   private function getLanguageMemberContacts($year, $lang) {
-    if ($lang == NL) {
+    if ($lang == 'NL') {
       $langList = "in ('nl_NL', 'Dutch', 'Neder')";
     }
     else if ($lang == 'FR') {
@@ -769,4 +833,57 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
     return $n;
   }
 
+  function getStoredBalancedScoreCard($y) {
+    /*************************
+     * The values of the BSC from previous years can be stored in the option group "Balanced Score Card".
+     * https://www.bemas.org/nl/civicrm/admin/options?reset=1
+     *
+     * Each entry contains the year in the "name" field, and the values in the "description".
+     * Values are in the format: label=value
+     * e.g.
+     * Terminated member contacts (incl. transfers)=-57
+     * Total number of member contacts=722
+     * New member companies this period=68
+     * ...
+     */
+    if ($this->storeValuesOptionGroupID) {
+      $sql = "
+        select
+          description
+        from
+          civicrm_option_value
+        where
+          option_group_id = %1
+        and 
+          name = %2
+      ";
+      $sqlParams = [
+        1 => [$this->storeValuesOptionGroupID, 'Integer'],
+        2 => [$y, 'Integer'],
+      ];
+
+      $multiValues = CRM_Core_DAO::singleValueQuery($sql, $sqlParams);
+      if ($multiValues) {
+        $valueArr = explode("\n", $multiValues);
+        foreach ($valueArr as $valueString) {
+          $splittedValue = explode('=', $valueString);
+          if (count($splittedValue) == 2) {
+            $this->storedValues[$y][$splittedValue[0]] = $splittedValue[1];
+          }
+        }
+      }
+    }
+  }
+
+  function getStoredBCValue($label, $year) {
+    $retval = 0;
+
+    if (array_key_exists($year, $this->storedValues)) {
+      if (array_key_exists($label, $this->storedValues[$year])) {
+        $retval = $this->storedValues[$year][$label];
+      }
+    }
+
+    return $retval;
+  }
 }
