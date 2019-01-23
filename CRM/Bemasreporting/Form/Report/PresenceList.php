@@ -10,7 +10,11 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
        // OK, found in the url
     }
     else {
-      $event_id = 0;
+      // not found, check submit values
+      $event_id = $this->getSelectedParam('event_value');
+      if (!$event_id) {
+        $event_id = 0;
+      }
     }
 
     $this->_columns = array(
