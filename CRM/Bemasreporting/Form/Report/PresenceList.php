@@ -183,7 +183,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
     $this->buildRows($sql, $rows);
 
     // get the selected event
-    $params = ['id' => $this->getSelectedParam('event_value']);
+    $params = ['id' => $this->getSelectedParam('event_value')];
     $event = civicrm_api3('Event', 'getsingle', $params);
     $eventDate = date_format(date_create($event['start_date']), 'd/m/Y');
     $this->assign('eventTitle', $event['title']);
