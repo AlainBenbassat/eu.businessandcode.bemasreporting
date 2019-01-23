@@ -152,7 +152,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
   }
 
   function where() {
-    $this->_where = " WHERE {$this->_aliases['civicrm_contact']}.is_deleted = 0 and {$this->_aliases['civicrm_contact']}.is_deceased = 0 and event_id = " . $this->_submitValues['event_value'];
+    $this->_where = " WHERE {$this->_aliases['civicrm_contact']}.is_deleted = 0 and {$this->_aliases['civicrm_contact']}.is_deceased = 0 and event_id = " . $this->getSelectedParam('event_value');
 
     if ($this->_aclWhere) {
       $this->_where .= " AND {$this->_aclWhere} ";
@@ -168,8 +168,9 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
 
   function postProcess() {
     // translate column labels
-    if (array_key_exists('language_value', $this->_submitValues) && $this->_submitValues['language_value']) {
-      $this->translateColumnHeaders($this->_submitValues['language_value']);
+    $lang = $this->getSelectedParam('language_value');
+    if ($lang) {
+      $this->translateColumnHeaders($lang);
     }
 
     $this->beginPostProcess();
@@ -182,15 +183,15 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
     $this->buildRows($sql, $rows);
 
     // get the selected event
-    $params = ['id' => $this->_submitValues['event_value']];
+    $params = ['id' => $this->getSelectedParam('event_value']);
     $event = civicrm_api3('Event', 'getsingle', $params);
     $eventDate = date_format(date_create($event['start_date']), 'd/m/Y');
     $this->assign('eventTitle', $event['title']);
     $this->assign('eventDate', $eventDate);
 
     // get the special roles
-    $speakers = $this->getEventSpecialRoles(4, $this->_submitValues['event_value'], $this->_submitValues['language_value']);
-    $coaches = $this->getEventSpecialRoles(3, $this->_submitValues['event_value'], $this->_submitValues['language_value']);
+    $speakers = $this->getEventSpecialRoles(4, $this->getSelectedParam('event_value'), $this->getSelectedParam('language_value'));
+    $coaches = $this->getEventSpecialRoles(3, $this->getSelectedParam('event_value'), $this->getSelectedParam('language_value'));
     $this->assign('eventSpeakers', $speakers);
     $this->assign('eventCoaches', $coaches);
 
@@ -200,11 +201,11 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
   }
 
   function alterDisplay(&$rows) {
-    if ($this->_submitValues['language_value'] == 'nl') {
+    if ($this->getSelectedParam('language_value') == 'nl') {
       $yes = 'Ja';
       $no = 'Nee';
     }
-    else if ($this->_submitValues['language_value'] == 'fr') {
+    else if ($this->getSelectedParam('language_value') == 'fr') {
       $yes = 'Oui';
       $no = 'Non';
     }
@@ -255,6 +256,18 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
     }
 
     return $eventList;
+  }
+
+  function getSelectedParam($name) {
+    if (array_key_exists($name, $this->_params) && $this->_params[$name]) {
+      return $this->_params[$name];
+    }
+    elseif (array_key_exists($name, $this->_submitValues) && $this->_submitValues[$name]) {
+      return $this->_submitValues[$name];
+    }
+    else {
+      return '';
+    }
   }
 
   function getEventSpecialRoles($roleID, $eventID, $lang) {
