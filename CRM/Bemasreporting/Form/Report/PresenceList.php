@@ -8,6 +8,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
     // see if we have an event id
     if (($event_id = CRM_Utils_Request::retrieve('event_id', 'Positive'))) {
        // OK, found in the url
+       $_SESSION['event_value'] = $event_id;
     }
     else {
       // not found, check submit values
@@ -268,6 +269,9 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
     }
     elseif (array_key_exists($name, $this->_submitValues) && $this->_submitValues[$name]) {
       return $this->_submitValues[$name];
+    }
+    elseif ($_SESSION['event_value']) {
+       return $_SESSION['event_value'];
     }
     else {
       return '';
