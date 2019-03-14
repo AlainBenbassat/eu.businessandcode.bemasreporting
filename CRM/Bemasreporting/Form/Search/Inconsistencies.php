@@ -124,19 +124,55 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // verkeerde voorkeurstaal
+    // verkeerde weergavenaam (NL)
     $q = new BemasInconsistenciesQuery();
-    $q->label = 'Personen met uitgeschakelde e-mailaanhef';
+    $q->label = 'Personen (NL) met weergavenaam zonder Dhr. of Mevr.';
     $q->index = $index;
     $q->from = "civicrm_contact contact_a";
     $q->where = "
-      ifnull(preferred_language, '') not in ('en_US', 'nl_NL', 'fr_FR')
-      and contact_a.contact_type = 'Individual'
-      and contact_a.is_deleted = 0
+      prefix_id in (11, 22)
+      and display_name not like 'Dhr. %'
+      and display_name not like 'Mevr. %'
+      and preferred_language = 'nl_NL'
+      and contact_type = 'Individual'
+      and is_deleted = 0
     ";
     $this->queries[$index] = $q;
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
+    // verkeerde weergavenaam (FR)
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Personen (FR) met weergavenaam zonder M. of Mme';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a";
+    $q->where = "
+      prefix_id in (11, 22)
+      and display_name not like 'M. %'
+      and display_name not like 'Mme %'
+      and preferred_language = 'fr_FR'
+      and contact_type = 'Individual'
+      and is_deleted = 0
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
+
+    // verkeerde weergavenaam (EN)
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Personen (EN) met weergavenaam zonder Mr. of Ms.';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a";
+    $q->where = "
+      prefix_id in (11, 22)
+      and display_name not like 'Mr. %'
+      and display_name not like 'Ms. %'
+      and preferred_language = 'en_EN'
+      and contact_type = 'Individual'
+      and is_deleted = 0
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
   }
 }
