@@ -95,9 +95,36 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
       $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
+    // contacten met verkeerde prefix
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Personen met een ander voorvoegsel dan Dhr./Mevr., M./Mme, Mr./Ms.';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a";
+    $q->where = "
+      contact_a.prefix_id is not null
+      and contact_a.prefix_id not in (11, 22)
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
+
     // verkeerde voorkeurstaal
     $q = new BemasInconsistenciesQuery();
-    $q->label = 'Personen met verkeerde voorkeurstaal';
+    $q->label = 'Personen met onbekende voorkeurstaal';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a";
+    $q->where = "
+      ifnull(preferred_language, '') not in ('en_US', 'nl_NL', 'fr_FR')
+      and contact_a.contact_type = 'Individual'
+      and contact_a.is_deleted = 0
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
+
+    // verkeerde voorkeurstaal
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Personen met uitgeschakelde e-mailaanhef';
     $q->index = $index;
     $q->from = "civicrm_contact contact_a";
     $q->where = "
