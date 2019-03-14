@@ -1,5 +1,4 @@
 <?php
-use CRM_Bemasreporting_ExtensionUtil as E;
 
 class BemasInconsistenciesQuery {
   public $label;
@@ -29,10 +28,9 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
   function &columns() {
     // return by reference
     $columns = array(
-      E::ts('Contact Id') => 'contact_id',
-      E::ts('Contact Type') => 'contact_type',
-      E::ts('Name') => 'sort_name',
-      E::ts('State') => 'state_province',
+      'Contact Id' => 'contact_id',
+      'Contacttype' => 'contact_type',
+      'Naam' => 'sort_name',
     );
     return $columns;
   }
