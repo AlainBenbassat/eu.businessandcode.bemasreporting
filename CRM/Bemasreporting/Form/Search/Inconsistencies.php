@@ -51,7 +51,12 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
 
   function from() {
     $values = $this->_formValues;
-    $from = 'FROM ' . $this->queries[$values['queryFilter']]->from;
+    if (array_key_exists('queryFilter', $values)) {
+      $from = 'FROM ' . $this->queries[$values['queryFilter']]->from;
+    }
+    else {
+      $from = "FROM civicrm_contact contact_a";
+    }
 
     return $from;
   }
@@ -60,7 +65,12 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
     $whereParams = [];
 
     $values = $this->_formValues;
-    $where = $this->queries[$values['queryFilter']]->where;
+    if (array_key_exists('queryFilter', $values)) {
+      $where = $this->queries[$values['queryFilter']]->where;
+    }
+    else {
+      $where = '';
+    }
 
     return $this->whereClause($where, $whereParams);
   }
