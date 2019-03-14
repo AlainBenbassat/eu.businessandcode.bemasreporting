@@ -167,7 +167,7 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
       prefix_id in (11, 22)
       and display_name not like 'Mr. %'
       and display_name not like 'Ms. %'
-      and preferred_language = 'en_EN'
+      and preferred_language = 'en_US'
       and contact_type = 'Individual'
       and is_deleted = 0
     ";
