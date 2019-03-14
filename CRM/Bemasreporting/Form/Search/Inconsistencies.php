@@ -103,6 +103,8 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
     $q->where = "
       contact_a.prefix_id is not null
       and contact_a.prefix_id not in (11, 22)
+      and contact_a.contact_type = 'Individual'
+      and contact_a.is_deleted = 0
     ";
     $this->queries[$index] = $q;
     $this->queriesRadioButtons[$q->index] = $q->label;
