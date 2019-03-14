@@ -12,7 +12,7 @@ return array (
     array (
       'version' => 3,
       'label' => 'Inconsistencies',
-      'description' => 'Inconsistencies (eu.businessandcode.bemasreporting)',
+      'description' => 'Inconsistencies',
       'class_name' => 'CRM_Bemasreporting_Form_Search_Inconsistencies',
     ),
   ),

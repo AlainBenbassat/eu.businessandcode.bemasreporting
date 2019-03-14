@@ -83,7 +83,7 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
 
     // contacten zonder prefix_id
     $q = new BemasInconsistenciesQuery();
-    $q->label = 'Contacten zonder voorvoegsel (Dhr./Mevr.)';
+    $q->label = 'Personen zonder voorvoegsel (Dhr./Mevr.)';
     $q->index = $index;
     $q->from = "civicrm_contact contact_a";
     $q->where = "
@@ -94,5 +94,20 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
     $this->queries[$index] = $q;
       $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
+
+    // verkeerde voorkeurstaal
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Personen met verkeerde voorkeurstaal';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a";
+    $q->where = "
+      ifnull(preferred_language, '') not in ('en_US', 'nl_NL', 'fr_FR')
+      and contact_a.contact_type = 'Individual'
+      and contact_a.is_deleted = 0
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
+
   }
 }
