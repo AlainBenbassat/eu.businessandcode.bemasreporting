@@ -20,7 +20,7 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
   function buildForm(&$form) {
     CRM_Utils_System::setTitle('Fouten in de database');
 
-    $form->addCheckBox('queryFilter', 'Te controleren:', $this->queriesRadioButtons, NULL, NULL, TRUE);
+    $form->addRadio('queryFilter', 'Te controleren:', $this->queriesRadioButtons, NULL, '<br>', TRUE);
 
     $form->assign('elements', ['queryFilter']);
   }
@@ -51,7 +51,7 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
 
   function from() {
     $values = $this->_formValues;
-    $from = $this->queries[$values['queryFilter']]->from;
+    $from = 'FROM ' . $this->queries[$values['queryFilter']]->from;
 
     return $from;
   }
