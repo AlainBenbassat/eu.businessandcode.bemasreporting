@@ -29,7 +29,6 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
     // return by reference
     $columns = array(
       'Contact Id' => 'contact_id',
-      'Contacttype' => 'contact_type',
       'Naam' => 'sort_name',
     );
     return $columns;
@@ -69,7 +68,7 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
       $where = $this->queries[$values['queryFilter']]->where;
     }
     else {
-      $where = '';
+      $where = '1=1';
     }
 
     return $this->whereClause($where, $whereParams);
@@ -93,7 +92,7 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
       and contact_a.is_deleted = 0
     ";
     $this->queries[$index] = $q;
-    $this->queriesRadioButtons[$q->label] = $q->index;
+      $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
   }
 }
