@@ -161,14 +161,14 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
 
     // add a start_date filter if not specified
     if (strpos($this->_where, 'start_date') === FALSE) {
-      $from = date('Y-m-d', time() - (86400 * 30)); // current date - 30 days
-      $to = date('Y-m-d', time() + (86400 * 60)); // current date + 60 days
+      $from = date('Y-m-d', time() - (86400 * 7)); // current date - 7 days
+      $to = date('Y-m-d', time() + (86400 * 90)); // current date + 90 days
       $this->_where .= " AND start_date between '$from' and '$to' ";
     }
   }
 
   function orderBy() {
-    $this->_orderBy = " ORDER BY {$this->_aliases['civicrm_event']}.start_date DESC";
+    $this->_orderBy = " ORDER BY {$this->_aliases['civicrm_event']}.start_date ";
   }
 
   function postProcess() {
