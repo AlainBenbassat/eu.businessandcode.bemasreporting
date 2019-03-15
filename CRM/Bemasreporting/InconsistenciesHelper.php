@@ -233,8 +233,8 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->index = $index;
     $q->from = "civicrm_contact contact_a";
     $q->where = "
-      (first_name COLLATE utf8_bin = LOWER(first_name) COLLATE utf8_bin
-      or last_name COLLATE utf8_bin = LOWER(last_name) COLLATE utf8_bin) 
+      (contact_a.first_name COLLATE utf8_bin = LOWER(contact_a.first_name) COLLATE utf8_bin
+      or contact_a.last_name COLLATE utf8_bin = LOWER(contact_a.last_name) COLLATE utf8_bin) 
       and contact_a.contact_type = 'Individual'
       and contact_a.is_deleted = 0
     ";
