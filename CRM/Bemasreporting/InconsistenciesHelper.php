@@ -226,5 +226,20 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queries[$index] = $q;
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
+
+    // namen zonder hoofdletters
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Voornaam en/of achternaam zonder hoofdletters';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a";
+    $q->where = "
+      (first_name COLLATE utf8_bin = LOWER(first_name) COLLATE utf8_bin
+      or last_name COLLATE utf8_bin = LOWER(last_name) COLLATE utf8_bin) 
+      and contact_a.contact_type = 'Individual'
+      and contact_a.is_deleted = 0
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
   }
 }
