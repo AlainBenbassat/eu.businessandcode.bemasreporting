@@ -29,7 +29,8 @@ class CRM_Bemasreporting_Form_Report_InconsistenciesSummary extends CRM_Report_F
   }
 
   function from() {
-    $this->_from = "FROM  civicrm_contact {$this->_aliases['civicrm_contact']} ";
+    // take small table
+    $this->_from = "FROM  civicrm_participant_status_type {$this->_aliases['civicrm_contact']} ";
   }
 
   function selectClause(&$tableName, $tableKey, &$fieldName, &$field) {
@@ -62,7 +63,8 @@ class CRM_Bemasreporting_Form_Report_InconsistenciesSummary extends CRM_Report_F
     // add link to custom search
     $url = CRM_Utils_System::url('civicrm/contact/search/custom?csid=23', 'reset=1');
     $row['civicrm_contact_column1'] = '<a = href="' . $url . '">Meer details</a>';
-    $row['civicrm_contact_column2'];
+    $row['civicrm_contact_column2'] = '';
+    $rows[] = $row;
   }
 
 }
