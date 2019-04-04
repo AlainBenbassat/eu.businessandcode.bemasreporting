@@ -244,5 +244,20 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queries[$index] = $q;
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
+
+    // land is België, maar postcode <> 4
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Land is België, maar postcode <> 4 cijfers';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a inner join civicrm_address a on contact_a.id = a.contact_id";
+    $q->where = "
+      a.postal_code <> '' and length(a.postal_code) <> 4
+      and a.country_id = 1020 
+      and a.master_id IS NULL
+      and contact_a.is_deleted = 0
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
   }
 }
