@@ -211,7 +211,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
 
     // we hebben een functiecode, maar geen e-mail
     $q = new BemasInconsistenciesQuery();
-    $q->label = 'Personen met een functiecode, maar geen e-mailadres';
+    $q->label = 'Personen met een functiecode, maar geen e-mailadres<br>(exclusief gepensioneerd en onbekende werkgever)';
     $q->index = $index;
     $q->from = "civicrm_contact contact_a
       left outer join civicrm_value_individual_details_19 id on id.entity_id = contact_a.id
@@ -221,6 +221,9 @@ class CRM_Bemasreporting_InconsistenciesHelper {
       ifnull(id.function_28, '') <> ''
       and e.id is null
       and contact_a.contact_type = 'Individual'
+      and contact_a.organization_name <> 'Retired - gepensioneerd - pensionné'
+      and contact_a.organization_name <> 'Unknown - Onbekend - Inconnu'
+      and contact_a.employer_id IS NOT NULL
       and contact_a.is_deleted = 0
     ";
     $this->queries[$index] = $q;
