@@ -288,7 +288,8 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->index = $index;
     $q->from = "civicrm_contact contact_a";
     $q->where = "
-      exists (
+      contact_a.preferred_language = 'nl_NL'
+      and exists (
         select a.id from civicrm_address a
         where 
           a.postal_code between '4000' and '7999'
