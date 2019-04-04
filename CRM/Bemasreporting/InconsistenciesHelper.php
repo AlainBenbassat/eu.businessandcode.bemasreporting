@@ -280,5 +280,30 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queries[$index] = $q;
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
+
+    // taal persoon is NL, maar bedrijf is in Wallonië
+    // postcode zonder cijfers
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Nederlandstalig persoon, maar bedrijf gevestigd in Wallonië';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a";
+    $q->where = "
+      exists (
+        select a.id from civicrm_address a
+        where 
+          a.postal_code between '4000' and '7999'
+        and 
+          a.country_id = 1020 
+        and 
+          a.master_id is NULL
+        and
+          a.contact_id = contact_a.employer_id
+      )
+      and contact_a.contact_type = 'Individual' 
+      and contact_a.is_deleted = 0
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
   }
 }
