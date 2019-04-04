@@ -259,5 +259,26 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queries[$index] = $q;
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
+
+    // postcode zonder cijfers
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Postcodes zonder cijfers';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a";
+    $q->where = "
+      exists (
+        select a.id from civicrm_address a
+        where 
+          a.postal_code REGEXP '^[a-zA-Z \-]+$'
+        and 
+          a.master_id is NULL
+        and
+          a.contact_id = contact_a.id
+      ) 
+      and contact_a.is_deleted = 0
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
   }
 }
