@@ -26,6 +26,21 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->from = "civicrm_contact contact_a";
     $q->where = "
       contact_a.prefix_id IS NULL
+      and ifnull(contact_a.last_name, '') <> ''       
+      and contact_a.contact_type = 'Individual'
+      and contact_a.is_deleted = 0
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
+
+    // personen zonder familienaam
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Personen zonder familienaam';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a";
+    $q->where = "
+      ifnull(contact_a.last_name, '') = ''       
       and contact_a.contact_type = 'Individual'
       and contact_a.is_deleted = 0
     ";
@@ -40,6 +55,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->from = "civicrm_contact contact_a";
     $q->where = "
       contact_a.prefix_id is not null
+      and ifnull(contact_a.last_name, '') <> ''
       and contact_a.prefix_id not in (11, 22)
       and contact_a.contact_type = 'Individual'
       and contact_a.is_deleted = 0
@@ -69,6 +85,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->from = "civicrm_contact contact_a";
     $q->where = "
       contact_a.prefix_id in (11, 22)
+      and ifnull(contact_a.last_name, '') <> ''
       and contact_a.display_name not like 'Dhr. %'
       and contact_a.display_name not like 'Mevr. %'
       and contact_a.preferred_language = 'nl_NL'
@@ -86,6 +103,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->from = "civicrm_contact contact_a";
     $q->where = "
       contact_a.prefix_id in (11, 22)
+      and ifnull(contact_a.last_name, '') <> ''
       and contact_a.display_name not like 'M. %'
       and contact_a.display_name not like 'Mme %'
       and contact_a.preferred_language = 'fr_FR'
@@ -103,6 +121,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->from = "civicrm_contact contact_a";
     $q->where = "
       contact_a.prefix_id in (11, 22)
+      and ifnull(contact_a.last_name, '') <> ''
       and contact_a.display_name not like 'Mr. %'
       and contact_a.display_name not like 'Ms. %'
       and contact_a.preferred_language = 'en_US'
