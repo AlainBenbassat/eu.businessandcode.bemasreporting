@@ -347,6 +347,8 @@ class CRM_Bemasreporting_InconsistenciesHelper {
             a.country_id = 1020
           and 
             a.postal_code not between '4000' and '7999'
+          and 
+            a.postal_code not between '1000' and '1999'            
           )
           or
             a.country_id = 1152
