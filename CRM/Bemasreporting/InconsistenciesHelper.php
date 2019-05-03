@@ -263,6 +263,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
       and contact_a.contact_type = 'Individual'
       and ifnull(contact_a.employer_id, 0) = 0
       and contact_a.is_deleted = 0
+      and ifnull(id.function_28, '') <> 'RET'
     ";
     $this->queries[$index] = $q;
     $this->queriesRadioButtons[$q->index] = $q->label;
