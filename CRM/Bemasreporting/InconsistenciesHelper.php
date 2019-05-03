@@ -251,7 +251,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
 
     // we hebben een functiecode + e-mail, maar geen werkgever
     $q = new BemasInconsistenciesQuery();
-    $q->label = 'Personen met een functiecode en e-mail, maar zonder werkgever';
+    $q->label = 'Personen met een functiecode en e-mail, maar zonder werkgever<br>(en geen e-mail opt-out)';
     $q->index = $index;
     $q->from = "civicrm_contact contact_a
       inner join civicrm_email e on e.contact_id = contact_a.id and e.is_primary = 1
