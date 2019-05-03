@@ -52,7 +52,7 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
     $select = "
       contact_a.id as contact_id
       , contact_a.sort_name
-      , if (contact_a.gender_id=1,'Man',if(contact_a.gender_id=2,'Vrouw', 'Onbekend')) as gender
+      , if (contact_a.gender_id=1,'Vrouw',if(contact_a.gender_id=2,'Man', 'Onbekend')) as gender
       , contact_a.preferred_language
       , contact_a.display_name as display_name
       , contact_a.first_name
