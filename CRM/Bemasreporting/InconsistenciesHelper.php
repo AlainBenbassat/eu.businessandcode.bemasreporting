@@ -257,6 +257,8 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->where = "
       contact_a.last_name <> '.'
       and contact_a.last_name <> ''
+      and contact_a.first_name <> '.'
+      and contact_a.first_name <> ''
       and (
         contact_a.first_name COLLATE utf8_bin = LOWER(contact_a.first_name) COLLATE utf8_bin
       or 
