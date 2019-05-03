@@ -262,7 +262,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
       and contact_a.contact_type = 'Individual'
       and ifnull(contact_a.employer_id, 0) = 0
       and contact_a.is_deleted = 0
-      and ifnull(id.function_28, '') <> 'RET'
+      and ifnull(id.function_28, '') not like 'RET%'
       and e.on_hold = 0
       and contact_a.is_opt_out = 0
       and contact_a.do_not_mail = 0
