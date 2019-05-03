@@ -182,6 +182,10 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->from = "civicrm_contact contact_a";
     $q->where = "
       contact_a.prefix_id = 11
+      and contact_a.last_name <> '.'
+      and contact_a.last_name <> ''
+      and contact_a.first_name <> '.'
+      and contact_a.first_name <> ''
       and ifnull(contact_a.gender_id, 0) = 0
       and contact_a.contact_type = 'Individual'
       and contact_a.is_deleted = 0
@@ -197,6 +201,10 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->from = "civicrm_contact contact_a";
     $q->where = "
       contact_a.prefix_id = 22
+      and contact_a.last_name <> '.'
+      and contact_a.last_name <> ''
+      and contact_a.first_name <> '.'
+      and contact_a.first_name <> ''
       and ifnull(contact_a.gender_id, 0) = 0
       and contact_a.contact_type = 'Individual'
       and contact_a.is_deleted = 0
