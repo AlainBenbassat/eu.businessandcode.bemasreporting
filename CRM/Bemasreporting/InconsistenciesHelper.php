@@ -249,6 +249,25 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
+    // we hebben een functiecode + e-mail, maar geen werkgever
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Personen met een functiecode en e-mail, maar zonder werkgever';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a
+      left outer join civicrm_value_individual_details_19 id on id.entity_id = contact_a.id
+      left outer join civicrm_email e on e.contact_id = contact_a.id and e.is_primary = 1
+    ";
+    $q->where = "
+      ifnull(id.function_28, '') <> ''
+      and e.id is not null
+      and contact_a.contact_type = 'Individual'
+      and ifnull(contact_a.employer_id, 0) = 0
+      and contact_a.is_deleted = 0
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
+
     // namen zonder hoofdletters
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Voornaam en/of achternaam zonder hoofdletters';
