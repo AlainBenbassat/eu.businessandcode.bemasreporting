@@ -26,12 +26,12 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
             'required' => TRUE,
           ),
           'registered_attended' => array(
-            'title' => ts('Ingeschreven<br>Deelgenomen'),
+            'title' => 'Ingeschreven / Deelgenomen',
             'required' => TRUE,
             'dbAlias' => '-1',
           ),
           'cancel_noshow' => array(
-            'title' => ts('Afwezig<br>Geannuleerd'),
+            'title' => 'Afwezig / Geannuleerd',
             'required' => TRUE,
             'dbAlias' => '-1',
           ),
@@ -191,8 +191,27 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
       $participantLink = CRM_Utils_System::baseURL() . 'civicrm/event/search?reset=1&force=1&status=true&event=' . $row['civicrm_event_id'];
       $participantCancelledLink = CRM_Utils_System::baseURL() . 'civicrm/event/search?reset=1&force=1&status=false&event=' . $row['civicrm_event_id'];
 
+      // get the event location
+      $sql = "
+        select 
+          concat(a.street_address, ', ', a.city) location
+        from 
+          civicrm_event e
+        inner join
+          civicrm_loc_block lb on lb.id = e.loc_block_id
+        inner join
+          civicrm_address a on lb.address_id = a.id
+        where 
+          e.id = %1
+      ";
+      $sqlParams = [1 => [$row['civicrm_event_id'], 'Integer']];
+      $location = CRM_Core_DAO::singleValueQuery($sql, $sqlParams);
+
       // change title in a hyperlink
       $url = "<a href=\"$eventLink\">{$row['civicrm_event_title']}</a>";
+      if ($location) {
+        $url .= "<br> <p style=\"font-size:80%\">{$location}</p>";
+      }
       $rows[$rowNum]['civicrm_event_title'] = $url;
 
       // count the registered participants (= everything but no show and cancel)
