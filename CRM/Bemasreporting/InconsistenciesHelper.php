@@ -19,7 +19,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
   function addQueries() {
     $index = 0;
 
-    // 1. namen zonder hoofdletters
+    // namen zonder hoofdletters
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Voornaam en/of achternaam zonder hoofdletters';
     $q->index = $index;
@@ -41,7 +41,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 2. we hebben een job title, maar geen functiecode
+    // we hebben een job title, maar geen functiecode
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Personen met een functie, maar geen functiecode';
     $q->index = $index;
@@ -58,7 +58,29 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 3. verkeerde voorkeurstaal
+    // werkgever is lid, maar persoon heeft geen lidmaatschap
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Werkgever is lid, maar persoon heeft geen lidmaatschap';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a
+      inner join
+        civicrm_relationship r on contact_a.id = r.contact_id_a and r.contact_id_b = contact_a.employer_id
+      inner join
+        civicrm_membership memp on contact_a.employer_id = memp.contact_id
+      left outer join
+        civicrm_membership mpers on contact_a.id = mpers.contact_id
+    ";
+    $q->where = "
+      contact_a.contact_type = 'Individual'
+      and mpers.id is null
+      and memp.start_date <= NOW() and memp.end_date >= NOW()
+      and contact_a.is_deleted = 0
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
+
+    // verkeerde voorkeurstaal
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Personen met onbekende voorkeurstaal';
     $q->index = $index;
@@ -72,7 +94,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 4. werkgeversrelatie maar geen werkgever
+    // werkgeversrelatie maar geen werkgever
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Actieve "medewerker van"-relatie maar geen werkgever';
     $q->index = $index;
@@ -89,7 +111,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 5. werkgever maar geen relatie
+    // werkgever maar geen relatie
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Werkgever maar geen relatie "medewerker van"';
     $q->index = $index;
@@ -106,7 +128,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 6. contacten zonder prefix_id
+    // contacten zonder prefix_id
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Personen zonder voorvoegsel (Dhr./Mevr.)';
     $q->index = $index;
@@ -121,7 +143,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 7. verkeerde weergavenaam (NL)
+    // verkeerde weergavenaam (NL)
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Personen (NL) met weergavenaam zonder Dhr. of Mevr.';
     $q->index = $index;
@@ -139,7 +161,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 8. verkeerde weergavenaam (FR)
+    // verkeerde weergavenaam (FR)
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Personen (FR) met weergavenaam zonder M. of Mme';
     $q->index = $index;
@@ -157,7 +179,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 9. verkeerde weergavenaam (EN)
+    // verkeerde weergavenaam (EN)
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Personen (EN) met weergavenaam zonder Mr. of Ms.';
     $q->index = $index;
@@ -175,7 +197,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 10. Vrouwelijke aanspreking, maar geen geslacht
+    // Vrouwelijke aanspreking, maar geen geslacht
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Vrouwelijke aanspreking, maar geen geslacht';
     $q->index = $index;
@@ -194,7 +216,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 11. Mannelijke aanspreking, maar geen geslacht
+    // Mannelijke aanspreking, maar geen geslacht
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Mannelijke aanspreking, maar geen geslacht';
     $q->index = $index;
@@ -213,7 +235,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 12. aanspreking = Mevr, geslacht = M
+    // aanspreking = Mevr, geslacht = M
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Aanspreking is vrouwelijk, geslacht is mannelijk';
     $q->index = $index;
@@ -228,7 +250,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 13. aanspreking = Dhr, geslacht = F
+    // aanspreking = Dhr, geslacht = F
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Aanspreking is mannelijk, geslacht is vrouwelijk';
     $q->index = $index;
@@ -243,7 +265,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 14. contacten met verkeerde prefix
+    // contacten met verkeerde prefix
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Personen met een ander voorvoegsel dan Dhr./Mevr., M./Mme, Mr./Ms.';
     $q->index = $index;
@@ -259,7 +281,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 15. land is België, maar postcode <> 4
+    // land is België, maar postcode <> 4
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Land is België, maar postcode <> 4 cijfers';
     $q->index = $index;
@@ -274,7 +296,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 16. postcode zonder cijfers
+    // postcode zonder cijfers
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Postcodes zonder cijfers';
     $q->index = $index;
@@ -295,7 +317,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 17. Nederlandstalig persoon, maar bedrijf gevestigd in Wallonië OF Frankrijk OF Luxemburg
+    // Nederlandstalig persoon, maar bedrijf gevestigd in Wallonië OF Frankrijk OF Luxemburg
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Nederlandstalig persoon, maar bedrijf gevestigd in Wallonië OF Frankrijk OF Luxemburg';
     $q->index = $index;
@@ -328,7 +350,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 18. Franstalige persoon, maar bedrijf gevestigd in Vlaanderen OF Nederland
+    // Franstalige persoon, maar bedrijf gevestigd in Vlaanderen OF Nederland
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Franstalige persoon, maar bedrijf gevestigd in Vlaanderen OF Nederland ';
     $q->index = $index;
@@ -361,7 +383,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 19. personen zonder familienaam
+    // personen zonder familienaam
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Personen zonder familienaam';
     $q->index = $index;
@@ -375,7 +397,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 20. we hebben een functiecode + e-mail, maar geen werkgever
+    // we hebben een functiecode + e-mail, maar geen werkgever
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Personen met een functiecode en e-mail, maar zonder werkgever<br>(en geen e-mail opt-out)';
     $q->index = $index;
@@ -397,7 +419,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
-    // 21. we hebben een functiecode, maar geen e-mail
+    // we hebben een functiecode, maar geen e-mail
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Personen met een functiecode, maar geen e-mailadres<br>(exclusief gepensioneerd en onbekende werkgever)';
     $q->index = $index;
