@@ -71,6 +71,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
             'type' => CRM_Utils_Type::T_STRING,
             'operatorType' => CRM_Report_Form::OP_SELECT,
             'options' => ['nl' => 'Nederlands', 'fr' => 'Français', 'en' => 'English'],
+            'default' => 'en',
             'required' => TRUE,
           ),
         ),
@@ -151,8 +152,8 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
       INNER JOIN
         civicrm_participant p
       ON
-        {$this->_aliases['civicrm_contact']}.id = p.contact_id 
-        AND p.role_id = 1 and p.status_id not in (4,7,8,9,10,11,12) 
+        {$this->_aliases['civicrm_contact']}.id = p.contact_id
+        AND p.role_id = 1 and p.status_id not in (4,7,8,9,10,11,12)
     ";
   }
 
