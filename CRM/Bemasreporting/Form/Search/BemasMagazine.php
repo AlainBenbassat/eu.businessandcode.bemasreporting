@@ -1,16 +1,12 @@
 <?php
-use CRM_Bemasreporting_ExtensionUtil as E;
 
 class CRM_Bemasreporting_Form_Search_BemasMagazine extends CRM_Contact_Form_Search_Custom_Base implements CRM_Contact_Form_Search_Interface {
-  private $INDIVIDUAL_PREFIX_GROUP_ID = 6;
-  private $MAGAZINE_ADDRESS_TYPE_ID = 7;
-
   function __construct(&$formValues) {
     parent::__construct($formValues);
   }
 
   function buildForm(&$form) {
-    CRM_Utils_System::setTitle(E::ts('BEMAS Magazine adressen'));
+    CRM_Utils_System::setTitle('BEMAS Magazine adressen');
   }
 
   function &columns() {
@@ -66,6 +62,8 @@ class CRM_Bemasreporting_Form_Search_BemasMagazine extends CRM_Contact_Form_Sear
         civicrm_contact contact_a
       INNER JOIN
         civicrm_membership m on contact_a.id = m.contact_id and m.membership_type_id between 1 and 10
+      INNER JOIN
+        civicrm_value_individual_details_19 indiv on indiv.entity_id = contact_a.id
       LEFT OUTER JOIN
         civicrm_value_magazine_41 magpref on magpref.entity_id = contact_a.id
       LEFT OUTER JOIN
@@ -90,6 +88,8 @@ class CRM_Bemasreporting_Form_Search_BemasMagazine extends CRM_Contact_Form_Sear
         contact_a.contact_type = 'Individual'
       and
         m.start_date <= NOW() and m.end_date >= NOW()
+      and
+        indiv.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact')
       and
         ifnull(magpref.versturen_naar_149, 1) in (1, 2)
     ";
