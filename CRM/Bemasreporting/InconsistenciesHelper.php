@@ -31,9 +31,9 @@ class CRM_Bemasreporting_InconsistenciesHelper {
       and contact_a.first_name <> ''
       and (
         contact_a.first_name COLLATE utf8_bin = LOWER(contact_a.first_name) COLLATE utf8_bin
-      or 
+      or
         contact_a.last_name COLLATE utf8_bin = LOWER(contact_a.last_name) COLLATE utf8_bin
-      ) 
+      )
       and contact_a.contact_type = 'Individual'
       and contact_a.is_deleted = 0
     ";
@@ -74,6 +74,37 @@ class CRM_Bemasreporting_InconsistenciesHelper {
       contact_a.contact_type = 'Individual'
       and mpers.id is null
       and memp.start_date <= NOW() and memp.end_date >= NOW()
+      and contact_a.is_deleted = 0
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
+
+    // Persoon heeft M1 of MC, maar geen lidmaatschap
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Persoon is (Primary) Member Contact, maar heeft geen lidmaatschap';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a
+      INNER JOIN
+        civicrm_value_individual_details_19 indiv on indiv.entity_id = contact_a.id
+    ";
+    $q->where = "
+      contact_a.contact_type = 'Individual'
+      and indiv.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact')
+      and not exists (
+        select
+          m.id
+        from
+          civicrm_membership m
+        where
+          m.contact_id = contact_a.id
+        and
+          m.membership_type_id between 1 and 10
+        and
+          m.start_date <= NOW()
+        and
+          m.end_date >= NOW()
+      )
       and contact_a.is_deleted = 0
     ";
     $this->queries[$index] = $q;
@@ -135,7 +166,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->from = "civicrm_contact contact_a";
     $q->where = "
       contact_a.prefix_id IS NULL
-      and ifnull(contact_a.last_name, '') <> ''       
+      and ifnull(contact_a.last_name, '') <> ''
       and contact_a.contact_type = 'Individual'
       and contact_a.is_deleted = 0
     ";
@@ -288,7 +319,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->from = "civicrm_contact contact_a inner join civicrm_address a on contact_a.id = a.contact_id";
     $q->where = "
       a.postal_code <> '' and length(a.postal_code) <> 4
-      and a.country_id = 1020 
+      and a.country_id = 1020
       and a.master_id IS NULL
       and contact_a.is_deleted = 0
     ";
@@ -304,13 +335,13 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->where = "
       exists (
         select a.id from civicrm_address a
-        where 
+        where
           a.postal_code REGEXP '^[a-zA-Z \-]+$'
-        and 
+        and
           a.master_id is NULL
         and
           a.contact_id = contact_a.id
-      ) 
+      )
       and contact_a.is_deleted = 0
     ";
     $this->queries[$index] = $q;
@@ -328,22 +359,22 @@ class CRM_Bemasreporting_InconsistenciesHelper {
         select a.id from civicrm_address a
         where
           a.contact_id = contact_a.employer_id
-        and 
+        and
           a.master_id is NULL
-        and 
+        and
         (
-          (  
+          (
             a.country_id = 1020
-          and 
+          and
             a.postal_code between '4000' and '7999'
           )
           or
             a.country_id = 1026
           or
             a.country_id = 1076
-        )              
+        )
       )
-      and contact_a.contact_type = 'Individual' 
+      and contact_a.contact_type = 'Individual'
       and contact_a.is_deleted = 0
     ";
     $this->queries[$index] = $q;
@@ -361,22 +392,22 @@ class CRM_Bemasreporting_InconsistenciesHelper {
         select a.id from civicrm_address a
         where
           a.contact_id = contact_a.employer_id
-        and 
+        and
           a.master_id is NULL
-        and 
+        and
         (
-          (  
+          (
             a.country_id = 1020
-          and 
+          and
             a.postal_code not between '4000' and '7999'
-          and 
-            a.postal_code not between '1000' and '1999'            
+          and
+            a.postal_code not between '1000' and '1999'
           )
           or
             a.country_id = 1152
-        )              
+        )
       )
-      and contact_a.contact_type = 'Individual' 
+      and contact_a.contact_type = 'Individual'
       and contact_a.is_deleted = 0
     ";
     $this->queries[$index] = $q;
@@ -389,7 +420,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->index = $index;
     $q->from = "civicrm_contact contact_a";
     $q->where = "
-      ifnull(contact_a.last_name, '') = ''       
+      ifnull(contact_a.last_name, '') = ''
       and contact_a.contact_type = 'Individual'
       and contact_a.is_deleted = 0
     ";
@@ -403,7 +434,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->index = $index;
     $q->from = "civicrm_contact contact_a
       inner join civicrm_email e on e.contact_id = contact_a.id and e.is_primary = 1
-      left outer join civicrm_value_individual_details_19 id on id.entity_id = contact_a.id      
+      left outer join civicrm_value_individual_details_19 id on id.entity_id = contact_a.id
     ";
     $q->where = "
       ifnull(id.function_28, '') <> ''
