@@ -18,16 +18,16 @@ class CRM_Bemasreporting_Form_Search_BemasMagazine extends CRM_Contact_Form_Sear
     $columns = [
       'Contact Id' => 'contact_id',
       'Organization' => 'organization_name',
-      'Prefix' => 'prefix',
+      'Language' => 'preferred_language',
+      'Addresse' => 'addressee_display',
       'First Name' => 'first_name',
       'Last Name' => 'last_name',
-      'Address line 1' => 'supplemental_address_1',
-      'Address line 2' => 'supplemental_address_2',
       'Street' => 'street_address',
+      'Extra address line 1' => 'supplemental_address_1',
+      'Extra address line 2' => 'supplemental_address_2',
       'Postal Code' => 'postal_code',
       'City' => 'city',
       'Country' => 'country',
-      'Magazine language' => 'magazine_lang',
     ];
     return $columns;
   }
