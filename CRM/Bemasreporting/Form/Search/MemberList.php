@@ -1,11 +1,5 @@
 <?php
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-/**
- * A custom contact search
- */
 class CRM_Bemasreporting_Form_Search_MemberList extends CRM_Contact_Form_Search_Custom_Base implements CRM_Contact_Form_Search_Interface {
   function __construct(&$formValues) {
     parent::__construct($formValues);
@@ -13,6 +7,16 @@ class CRM_Bemasreporting_Form_Search_MemberList extends CRM_Contact_Form_Search_
 
   function buildForm(&$form) {
     CRM_Utils_System::setTitle(ts('Ledenlijst'));
+
+    $fields = [];
+    $defaults = [];
+
+    $form->addYesNo('inherited_membership', ts('Including subsidiaries?'), FALSE, FALSE);
+    $defaults['inherited_membership'] = 1;
+    $fields[] = 'inherited_membership';
+
+    $form->assign('elements', $fields);
+    $form->setDefaults($defaults);
   }
 
   function summary() {
@@ -65,7 +69,7 @@ class CRM_Bemasreporting_Form_Search_MemberList extends CRM_Contact_Form_Search_
       , '' url
       , act.activity__nl__3 description_nl
       , act.activity__en__4 description_en
-      , act.activity__fr__5 description_fr      
+      , act.activity__fr__5 description_fr
       , '' as member_contacts
       , nace.label nace_code
     ";
@@ -75,19 +79,19 @@ class CRM_Bemasreporting_Form_Search_MemberList extends CRM_Contact_Form_Search_
 
   function from() {
     return "
-      FROM     
+      FROM
         civicrm_contact contact_a
       inner join
         civicrm_membership m on m.contact_id = contact_a.id
-      left outer join 
+      left outer join
         civicrm_address a on a.contact_id = contact_a.id and a.is_primary = 1
-      left outer join 
+      left outer join
         civicrm_country ctry on a.country_id = ctry.id
-      left outer join 
+      left outer join
         civicrm_email e on e.contact_id = contact_a.id and e.is_primary = 1
-      left outer join 
+      left outer join
         civicrm_phone p on p.contact_id = contact_a.id and p.is_primary = 1
-      left outer join 
+      left outer join
         civicrm_value_activity_9 act on act.entity_id = contact_a.id
       left outer join
         civicrm_option_value nace on act.type_of_activity__nace__6 = nace.value and nace.option_group_id = 85
@@ -95,12 +99,23 @@ class CRM_Bemasreporting_Form_Search_MemberList extends CRM_Contact_Form_Search_
   }
 
   function where($includeContactIDs = FALSE) {
-    $params = array();
+    $filterInheritedMembership = CRM_Utils_Array::value('inherited_membership', $this->_formValues);
+    $params = [];
 
     $where = "
-      m.owner_membership_id IS NULL
+      is_deleted = 0
       and m.status_id = 2
     ";
+
+    if ($filterInheritedMembership == 1) {
+      $where .= " and (m.owner_membership_id IS NULL or contact_a.contact_type = 'Organization')";
+    }
+    else {
+      $where .= ' and m.owner_membership_id IS NULL ';
+    }
+
+
+
 
     return $this->whereClause($where, $params);
   }
@@ -121,11 +136,11 @@ class CRM_Bemasreporting_Form_Search_MemberList extends CRM_Contact_Form_Search_
         , e.email
       from
         civicrm_contact c
-      left outer join 
+      left outer join
         civicrm_value_individual_details_19 det on det.entity_id = c.id
-      left outer join 
+      left outer join
         civicrm_email e on e.contact_id = c.id and e.is_primary = 1
-      where 
+      where
         c.employer_id = %1
       and
         types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact')
