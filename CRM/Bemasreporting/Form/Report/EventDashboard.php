@@ -115,7 +115,7 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
   }
 
   function from() {
-    $this->_from = " FROM  civicrm_event {$this->_aliases['civicrm_event']} 
+    $this->_from = " FROM  civicrm_event {$this->_aliases['civicrm_event']}
       LEFT OUTER JOIN civicrm_value_activiteit_status_25 {$this->_aliases['civicrm_event_custom']}
       ON {$this->_aliases['civicrm_event']}.id = {$this->_aliases['civicrm_event_custom']}.entity_id";
   }
@@ -186,37 +186,47 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
 
   function alterDisplay(&$rows) {
     foreach ($rows as $rowNum => $row) {
+      // income
+      $event_income = 0;
+      $event_min_income = 0;
+
       // hyperlinks to event and participants
       $eventLink = CRM_Utils_System::baseURL() . 'civicrm/event/manage/settings?reset=1&action=update&id=' . $row['civicrm_event_id'];
       $participantLink = CRM_Utils_System::baseURL() . 'civicrm/event/search?reset=1&force=1&status=true&event=' . $row['civicrm_event_id'];
       $participantCancelledLink = CRM_Utils_System::baseURL() . 'civicrm/event/search?reset=1&force=1&status=false&event=' . $row['civicrm_event_id'];
 
-      // get the event location
+      // get extra event information
       $sql = "
-        select 
-          concat(a.street_address, ', ', a.city) location
-        from 
+        select
+          concat(a.street_address, ', ', a.city) location,
+          ifnull(s.minimum_budget_151, 0) event_min_income
+        from
           civicrm_event e
-        inner join
+        left outer join
           civicrm_loc_block lb on lb.id = e.loc_block_id
-        inner join
+        left outer join
           civicrm_address a on lb.address_id = a.id
-        where 
+        left outer join
+          civicrm_value_activiteit_status_25 s on s.entity_id = e.id
+        where
           e.id = %1
       ";
       $sqlParams = [1 => [$row['civicrm_event_id'], 'Integer']];
-      $location = CRM_Core_DAO::singleValueQuery($sql, $sqlParams);
+      $dao = CRM_Core_DAO::executeQuery($sql, $sqlParams);
+      $dao->fetch();
+
+      $event_min_income = $dao->event_min_income;
 
       // change title in a hyperlink
       $url = "<a href=\"$eventLink\">{$row['civicrm_event_title']}</a>";
-      if ($location) {
-        $url .= "<br> <p style=\"font-size:80%\">{$location}</p>";
+      if ($dao->location) {
+        $url .= "<br> <p style=\"font-size:80%\">{$dao->location}</p>";
       }
       $rows[$rowNum]['civicrm_event_title'] = $url;
 
       // count the registered participants (= everything but no show and cancel)
       $statusIDs = '3,4';
-      $sql = "select count(*) from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and 
+      $sql = "select count(*) from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and
         p.event_id = " . $row['civicrm_event_id'] . " and p.status_id not in (" . $statusIDs . ")";
       $count = CRM_Core_DAO::singleValueQuery($sql);
       $url = "<a href=\"$participantLink\">$count</a>";
@@ -224,7 +234,7 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
 
       // count the canceled and no-show participants
       $statusIDs = '3,4';
-      $sql = "select count(*) from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and 
+      $sql = "select count(*) from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and
         p.event_id = " . $row['civicrm_event_id'] . " and p.status_id in (" . $statusIDs . ")";
       $count = CRM_Core_DAO::singleValueQuery($sql);
       $url = "<a href=\"$participantCancelledLink\">$count</a>";
@@ -232,7 +242,7 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
 
       // count the participants to be invoiced (exclude no show and cancel)
       $statusIDs = '3,4';
-      $sql = "select count(*) count_result, ifnull(sum(ifnull(fee_amount, 0) - ifnull(discount_amount, 0)), 0) fee_result from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and 
+      $sql = "select count(*) count_result, ifnull(sum(ifnull(fee_amount, 0) - ifnull(discount_amount, 0)), 0) fee_result from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and
         p.event_id = " . $row['civicrm_event_id'] . " and p.status_id not in (" . $statusIDs . ")
         and ifnull(fee_amount, 0) - ifnull(discount_amount, 0) > 0
       ";
@@ -240,10 +250,11 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
       $dao->fetch();
       $rows[$rowNum]['civicrm_event_to_be_invoiced'] = $dao->count_result;
       $rows[$rowNum]['civicrm_event_fee_to_be_invoiced'] = $dao->fee_result;
+      $event_income += $dao->fee_result;
 
       // count the invoiced participants
       $statusIDs = '16';
-      $sql = "select count(*) count_result, ifnull(sum(ifnull(fee_amount, 0) - ifnull(discount_amount, 0)), 0) fee_result from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and 
+      $sql = "select count(*) count_result, ifnull(sum(ifnull(fee_amount, 0) - ifnull(discount_amount, 0)), 0) fee_result from civicrm_participant p inner join civicrm_contact c on c.id = p.contact_id where c.is_deleted = 0 and
         p.event_id = " . $row['civicrm_event_id'] . " and p.status_id = " . $statusIDs . "
         and ifnull(fee_amount, 0) - ifnull(discount_amount, 0) > 0
       ";
@@ -251,6 +262,19 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
       $dao->fetch();
       $rows[$rowNum]['civicrm_event_invoiced'] = $dao->count_result;
       $rows[$rowNum]['civicrm_event_fee_invoiced'] = $dao->fee_result;
+      $event_income += $dao->fee_result;
+
+      $color = 'white';
+      if ($event_min_income > 0) {
+        if ($event_income < $event_min_income) {
+          $color = 'red';
+        }
+        else {
+          $color = 'green';
+        }
+      }
+      $rows[$rowNum]['civicrm_event_title'] = '<i style="color:' . $color . '" class="crm-i fa-stop"></i> ' . $rows[$rowNum]['civicrm_event_title'];
+
     }
   }
 }
