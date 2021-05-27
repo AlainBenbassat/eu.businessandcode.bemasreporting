@@ -25,7 +25,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
 
 
     // add years
-    $currentYear = date('Y');
+    $currentYear = date('Y') + 1;
     for ($i = self::NUMYEARS; $i >= 0; $i--) {
       $y = $currentYear - $i;
       $this->_columns['civicrm_contact']['fields'][$y] = array(
@@ -95,7 +95,7 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
 
   public function alterDisplay(&$rows) {
     $rows = array();
-    $currentYear = date('Y');
+    $currentYear = date('Y') + 1;
 
     // TITLE ROW
     $row = array();
