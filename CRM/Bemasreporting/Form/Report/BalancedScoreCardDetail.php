@@ -37,6 +37,9 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCardDetail extends CRM_Report_
     // get the sql statement
     $sql = $bscData->$method($year);
     $this->_select = $sql;
+
+    // show the the query name and year
+    CRM_Core_Session::setStatus($this->helper->rowHeaders[$queryId]['label'] . ' - ' . $year, '', 'no-popup');
   }
 
   public function from() {
@@ -49,30 +52,6 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCardDetail extends CRM_Report_
 
   function postProcess() {
     parent::postProcess();
-/*
-     $this->beginPostProcess();
-    // get the sql query from our data class
-    $bscData = new CRM_Bemasreporting_BalancedScoreCardData();
-    $bscData->setReturnModeAllRecords();
-
-    // get the query identifier and the year from the url
-    $queryId = $this->getQueryIdentifierFromUrl();
-    $year = $this->getYearFromUrl();
-    $method = $this->helper->rowHeaders[$queryId]['method'];
-
-    // get the sql statement
-    $sql = $bscData->$method($year);
-
-    // show the name of the query and year
-    $this->assign('reportSubTitle', $this->helper->rowHeaders[$queryId]['label'] . ' - ' . $year);
-
-    $sql = $this->buildQuery(TRUE);
-    $rows = [];
-    $this->buildRows($sql, $rows);
-
-    $this->formatDisplay($rows);
-    $this->doTemplateAssignment($rows);
-    $this->endPostProcess($rows);*/
   }
 
   public function alterDisplay(&$rows) {
