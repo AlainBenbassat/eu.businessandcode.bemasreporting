@@ -470,5 +470,20 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queries[$index] = $q;
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
+
+    // personen met 2 lidmaatschappen
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Personen met meerdere lidmaatschappen';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a";
+    $q->where = "
+      contact_a.is_deleted = 0
+      and contact_a.contact_type = 'Individual'
+      and (select count(m.id) from civicrm_membership m where m.contact_id = contact_a.id and m.status_id = 2) > 1
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
+
   }
 }

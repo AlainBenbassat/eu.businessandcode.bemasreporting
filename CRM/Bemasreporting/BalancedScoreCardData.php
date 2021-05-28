@@ -18,7 +18,7 @@ class CRM_Bemasreporting_BalancedScoreCardData {
   public function setReturnModeAllRecords() {
     $this->countMode = FALSE;
     $this->orderBy = ' order by c.sort_name ';
-    $this->selectColumns = ' c.id balanced_score_card_id, c.display_name balanced_score_card_display_name ';
+    $this->selectColumns = ' distinct c.id balanced_score_card_id, c.display_name balanced_score_card_display_name ';
   }
 
   public function getNewMemberContactCount($year) {
