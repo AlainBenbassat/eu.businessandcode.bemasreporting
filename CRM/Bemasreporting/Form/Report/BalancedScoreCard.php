@@ -4,12 +4,16 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
   const NUMYEARS = 5;
   private $yearsToDisplay = [];
   private $helper;
+  private $bscData;
+  private $bscStoredData;
 
   public function __construct() {
-    $this->helper = new CRM_Bemasreporting_BalancedScoreCardHelper();
-
     // fill in the array containing the years to display
     $this->fillYearsToDisplay();
+
+    $this->helper = new CRM_Bemasreporting_BalancedScoreCardHelper();
+    $this->bscData = new CRM_Bemasreporting_BalancedScoreCardData();
+    $this->bscStoredData = new CRM_Bemasreporting_BalancedScoreCardStoredData($this->yearsToDisplay);
 
     $this->_columns = [
       'balanced_score_card' => [
@@ -65,8 +69,6 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
   }
 
   public function alterDisplay(&$rows) {
-    $bscData = new CRM_Bemasreporting_BalancedScoreCardData();
-
     $rows = [];
     foreach ($this->helper->rowHeaders as $queryId => $rowHeader) {
       $row = [];
@@ -85,16 +87,36 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCard extends CRM_Report_Form {
           $row['balanced_score_card_' . $year] = '';
         }
         else {
-          $method = $rowHeader['method'];
-          $value = $bscData->$method($year);
-          $url = '<a href="http://localhost/~alain/bemas/nl/civicrm/report/eu.businessandcode.bemasreporting/balancedscorecard-detail?reset=1&qid=' . $queryId . '&year=' . $year . '">' . $value . '</a>';
-          $row['balanced_score_card_' . $year] = $url;
+          $row['balanced_score_card_' . $year] = $this->getRowValue($queryId, $rowHeader, $year);
         }
       }
 
       // add the row to the report
       $rows[] = $row;
     }
+  }
+
+  private function getRowValue($queryId, $rowHeader, $year) {
+    $value = $this->getRowValueFromStoredData($rowHeader, $year);
+    if ($value === FALSE) {
+      $value = $this->getRowValueFromQuery($queryId, $rowHeader, $year);
+    }
+
+    return $value;
+  }
+
+  private function getRowValueFromStoredData($rowHeader, $year) {
+    return $this->bscStoredData->getValue($rowHeader['label'], $year);
+  }
+
+  private function getRowValueFromQuery($queryId, $rowHeader, $year) {
+    $method = $rowHeader['method'];
+    $value = $this->bscData->$method($year);
+    $queryParams = 'reset=1&qid=' . $queryId . '&year=' . $year;
+    $url = CRM_Utils_System::url('civicrm/report/eu.businessandcode.bemasreporting/balancedscorecard-detail', $queryParams);
+    $aTag = '<a href="' . $url . '">' . $value . '</a>';
+
+    return $aTag;
   }
 
   private function getEventDashboardFields() {
