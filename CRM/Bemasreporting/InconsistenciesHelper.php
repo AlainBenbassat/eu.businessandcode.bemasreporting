@@ -485,5 +485,30 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
+    // personen met meerdere event rollen (is momenteel een probleem, zie https://lab.civicrm.org/dev/core/-/issues/2377
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Personen met meerdere deelnemersrollen (BLOKKEERT HERINNERINGSMAILS)';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a
+    ";
+    $q->where = "
+      contact_a.is_deleted = 0
+      and contact_a.contact_type = 'Individual'
+      and exists (
+        select
+          p.id
+        from
+          civicrm_participant p
+        where
+          p.contact_id = contact_a.id
+        and
+          length(role_id) > 1
+        and
+          p.register_date > '2021-05-01'
+      )
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
   }
 }
