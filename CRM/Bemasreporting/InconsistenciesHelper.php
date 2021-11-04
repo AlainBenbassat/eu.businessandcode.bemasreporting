@@ -504,7 +504,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
         and
           length(role_id) > 1
         and
-          p.register_date > '2021-05-01'
+          p.register_date > '2021-01-01'
       )
     ";
     $this->queries[$index] = $q;
