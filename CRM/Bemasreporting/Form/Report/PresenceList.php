@@ -292,8 +292,10 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
       else {
         $label = 'Coach(es): ';
       }
+
+      $roleIdClause = "role_id like '%$roleID%'";
     }
-    elseif ($roleID == 4 || $roleID == 6) {
+    elseif ($roleID == 4) {
       if ($lang == 'nl') {
         $label = 'Spreker(s)/lesgever(s): ';
       }
@@ -303,6 +305,8 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
       else {
         $label = 'Speaker(s)/trainer(s): ';
       }
+
+      $roleIdClause = "(role_id like '%4%' or role_id like '%6%')";
     }
 
     $sql = "
@@ -313,7 +317,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
       inner join
         civicrm_contact c on p.contact_id = c.id
       where
-        role_id like '%$roleID%' and event_id = $eventID
+        $roleIdClause and event_id = $eventID
         and status_id in (1, 2, 5)
       order by
         sort_name
