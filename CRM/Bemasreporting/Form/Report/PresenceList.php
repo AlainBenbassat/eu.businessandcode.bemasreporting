@@ -153,7 +153,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
         civicrm_participant p
       ON
         {$this->_aliases['civicrm_contact']}.id = p.contact_id
-        AND p.role_id = 1 and p.status_id not in (4,7,8,9,10,11,12)
+        AND p.role_id like '%1%' and p.status_id not in (4,7,8,9,10,11,12)
     ";
   }
 
@@ -293,11 +293,11 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
         $label = 'Coach(es): ';
       }
     }
-    else if ($roleID == 4) {
+    elseif ($roleID == 4 || $roleID == 6) {
       if ($lang == 'nl') {
         $label = 'Spreker(s)/lesgever(s): ';
       }
-      else if ($lang == 'fr') {
+      elseif ($lang == 'fr') {
         $label = 'Orateur(s)/formateur(s): ';
       }
       else {
@@ -313,7 +313,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
       inner join
         civicrm_contact c on p.contact_id = c.id
       where
-        role_id = $roleID and event_id = $eventID
+        role_id like '%$roleID%' and event_id = $eventID
         and status_id in (1, 2, 5)
       order by
         sort_name
