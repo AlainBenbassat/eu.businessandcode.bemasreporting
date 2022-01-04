@@ -99,12 +99,16 @@ class CRM_Bemasreporting_Form_Search_MemberList extends CRM_Contact_Form_Search_
   }
 
   function where($includeContactIDs = FALSE) {
+    $STATUS_NEW = 1;
+    $STATUS_CURRENT = 2;
+    $STATUS_GRACE = 3;
+    $STATUS_RESIGNING = 10;
     $filterInheritedMembership = CRM_Utils_Array::value('inherited_membership', $this->_formValues);
     $params = [];
 
     $where = "
       is_deleted = 0
-      and m.status_id = 2
+      and m.status_id in ($STATUS_NEW, $STATUS_CURRENT, $STATUS_GRACE, $STATUS_RESIGNING)
     ";
 
     if ($filterInheritedMembership == 1) {
@@ -125,6 +129,8 @@ class CRM_Bemasreporting_Form_Search_MemberList extends CRM_Contact_Form_Search_
   }
 
   function alterRow(&$row) {
+    $PRIMARY_MEMBER_CONTACT = 14;
+    $MEMBER_CONTACT = 15;
     $contactList = [];
 
     // get member contacts
@@ -137,13 +143,26 @@ class CRM_Bemasreporting_Form_Search_MemberList extends CRM_Contact_Form_Search_
       from
         civicrm_contact c
       left outer join
-        civicrm_value_individual_details_19 det on det.entity_id = c.id
-      left outer join
         civicrm_email e on e.contact_id = c.id and e.is_primary = 1
       where
         c.employer_id = %1
       and
-        types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact')
+        c.is_deleted = 0
+      and
+        exists (
+          select
+            rmc.id
+          from
+            civicrm_relationship rmc
+          where
+            rmc.contact_id_a = c.id
+          and
+            rmc.relationship_type_id in ($PRIMARY_MEMBER_CONTACT, $MEMBER_CONTACT)
+          and
+            rmc.is_active = 1
+        )
+        order by
+          c.sort_name
     ";
     $sqlParams = [
       1 => [$row['contact_id'], 'Integer'],
