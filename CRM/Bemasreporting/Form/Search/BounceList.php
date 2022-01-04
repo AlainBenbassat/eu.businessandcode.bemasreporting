@@ -8,12 +8,12 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
   private $filterLastName = '';
   private $filterLanguage ='';
   private $filterMembership = 0;
-  private $filterFunctionCode = array();
+  private $filterFunctionCode = [];
 
   function __construct(&$formValues) {
     parent::__construct($formValues);
 
-    $this->_columns = array(
+    $this->_columns = [
       ts('Contact ID') => 'contact_a.id',
       ts("Organization Name") => "organization_name",
       ts("Email Employer") => "employer_email",
@@ -26,7 +26,7 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
       ts("Function") => "custom_28",
       ts("Email") => "primary_email",
       ts("Phone") => "primary_phone",
-    );
+    ];
   }
 
   function buildForm(&$form) {
@@ -34,10 +34,10 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
 
     $fields = array();
 
-    $form->add('text', 'first_name', ts('First Name'), TRUE);
+    $form->add('text', 'first_name', ts('First Name'), []);
     $fields[] = 'first_name';
 
-    $form->add('text', 'last_name', ts('Last Name'), TRUE);
+    $form->add('text', 'last_name', ts('Last Name'), []);
     $fields[] = 'last_name';
 
     $form->addYesNo('membership', ts('Organisatie lid van BEMAS?'));
@@ -79,6 +79,7 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
 
   function select() {
     $sortFields = $this->getSortFields();
+    $typeOfMemberContact = $this->getTypeOfMemberContact();
 
     $selectFields = "
       contact_a.id as contact_id
@@ -95,7 +96,7 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
       , contact_phone.phone as primary_phone
       , civicrm_value_individual_details_19.function_28 as custom_28
       , civicrm_value_individual_details_19.bemas_function_29 as custom_29
-      , civicrm_value_individual_details_19.types_of_member_contact_60 as custom_60      
+      , $typeOfMemberContact as custom_60
       , civicrm_value_activity_9.type_of_activity__nace__6 as custom_6
       , employer_email.email as employer_email
       , employer_country.name as country_name
@@ -105,11 +106,11 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
       , civicrm_value_membership_15.membership_type_58 as custom_58
       , civicrm_value_membership_15.number_of_additional_member_cont_15
       , civicrm_value_membership_15.total_number_of_member_contacts_16
-      , employer.organization_name as organization_name            
+      , employer.organization_name as organization_name
       , civicrm_value_organization_details_14.category__employees_for_membersh_13 as custom_13
       , civicrm_value_organization_details_14.number_of_employees_72 as custom_72
       , civicrm_value_organization_details_14.popsy_id_25 as custom_25
-      , civicrm_value_organization_details_14.vat_number_11 as custom_11      
+      , civicrm_value_organization_details_14.vat_number_11 as custom_11
       , employer_address.postal_code as postal_code
       , employer_address.street_address as street_address
       , employer_phone.phone as employer_phone
@@ -119,7 +120,6 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
       , civicrm_value_activity_9.type_of_activity__nace__6 as custom_6
       , $sortFields
     ";
-
     return $selectFields;
   }
 
@@ -129,29 +129,29 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
         civicrm_contact contact_a
       LEFT OUTER JOIN
         civicrm_option_value prf ON contact_a.prefix_id = prf.value AND prf.option_group_id = 6
-      LEFT OUTER JOIN        
+      LEFT OUTER JOIN
         civicrm_email contact_email ON contact_a.id = contact_email.contact_id and contact_email.is_primary = 1
-      LEFT OUTER JOIN        
+      LEFT OUTER JOIN
         civicrm_phone contact_phone ON contact_a.id = contact_phone.contact_id and contact_phone.is_primary = 1
       LEFT OUTER JOIN
         civicrm_contact employer ON employer.id = contact_a.employer_id
-      LEFT OUTER JOIN        
+      LEFT OUTER JOIN
         civicrm_email employer_email ON employer_email.contact_id = employer.id and employer_email.is_primary = 1
-      LEFT OUTER JOIN        
+      LEFT OUTER JOIN
         civicrm_address employer_address ON employer_address.contact_id = employer.id and employer_address.is_primary = 1
       LEFT OUTER JOIN
         civicrm_country employer_country ON employer_address.country_id = employer_country.id
-      LEFT OUTER JOIN        
+      LEFT OUTER JOIN
         civicrm_website employer_website ON employer_website.contact_id = employer.id and employer_website.website_type_id = 1
-      LEFT OUTER JOIN        
+      LEFT OUTER JOIN
         civicrm_phone employer_phone ON employer_phone.contact_id = employer.id and employer_phone.is_primary = 1
-      LEFT OUTER JOIN        
-        civicrm_value_individual_details_19 ON civicrm_value_individual_details_19.entity_id = contact_a.id 
-      LEFT OUTER JOIN        
+      LEFT OUTER JOIN
+        civicrm_value_individual_details_19 ON civicrm_value_individual_details_19.entity_id = contact_a.id
+      LEFT OUTER JOIN
         civicrm_value_activity_9 ON civicrm_value_activity_9.entity_id = employer.id
-      LEFT OUTER JOIN        
+      LEFT OUTER JOIN
         civicrm_value_membership_15 ON civicrm_value_membership_15.entity_id = employer.id
-      LEFT OUTER JOIN        
+      LEFT OUTER JOIN
         civicrm_value_organization_details_14 ON civicrm_value_organization_details_14.entity_id = employer.id
     ";
 
@@ -243,6 +243,20 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
     list($this->_aclFrom, $this->_aclWhere) = CRM_Contact_BAO_Contact_Permission::cacheClause($tableAlias);
   }
 
+  private function getTypeOfMemberContact() {
+    $sql = "
+      CASE
+        WHEN (select max(m1.id) from civicrm_relationship m1 where m1.relationship_type_id = 14 and m1.is_active = 1 and m1.contact_id_a = contact_a.id) IS NOT NULL THEN 'M1'
+        WHEN (select max(mc.id) from civicrm_relationship mc where mc.relationship_type_id = 15 and mc.is_active = 1 and mc.contact_id_a = contact_a.id) IS NOT NULL THEN 'MC'
+        WHEN (select max(mx.id) from civicrm_relationship mx where mx.relationship_type_id in (14, 15) and mx.is_active = 0 and mx.contact_id_a = contact_a.id) IS NOT NULL THEN 'Mx'
+        ELSE
+        ''
+      END
+    ";
+
+    return $sql;
+  }
+
   private function getSortFields() {
     // The field we are building here will define the sort order of the organizations.
     // Because it is a field in the SQL statement that retrieves individuals, it is from that point of view
@@ -266,13 +280,13 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
       if (
         employer.id IS NULL
         , if (
-            civicrm_value_individual_details_19.types_of_member_contact_60 = 'M1 - Primary member contact'
+            (select max(m1.id) from civicrm_relationship m1 where m1.relationship_type_id = 14 and m1.is_active = 1 and m1.contact_id_a = contact_a.id) IS NOT NULL
             , '0'
             , if (
-                civicrm_value_individual_details_19.types_of_member_contact_60 = 'MC - Member contact'
+                (select max(mc.id) from civicrm_relationship mc where mc.relationship_type_id = 15 and mc.is_active = 1 and mc.contact_id_a = contact_a.id) IS NOT NULL
                 , '1'
                 , if (
-                    civicrm_value_individual_details_19.types_of_member_contact_60 = 'Mx - Ex-member contact'
+                    (select max(mx.id) from civicrm_relationship mx where mx.relationship_type_id in (14, 15) and mx.is_active = 0 and mx.contact_id_a = contact_a.id) IS NOT NULL
                     , '2'
                     , '5'
                 )
