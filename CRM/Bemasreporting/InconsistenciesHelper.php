@@ -19,6 +19,10 @@ class CRM_Bemasreporting_InconsistenciesHelper {
   function addQueries() {
     $PRIMARY_MEMBER_CONTACT = 14;
     $MEMBER_CONTACT = 15;
+    $STATUS_NEW = 1;
+    $STATUS_CURRENT = 2;
+    $STATUS_GRACE = 3;
+    $STATUS_RESIGNING = 10;
 
     $index = 0;
 
@@ -113,9 +117,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
         and
           m.membership_type_id between 1 and 10
         and
-          m.start_date <= NOW()
-        and
-          m.end_date >= NOW()
+          m.status_id in ($STATUS_NEW, $STATUS_CURRENT, $STATUS_GRACE, $STATUS_RESIGNING)
       )
       and contact_a.is_deleted = 0
     ";
