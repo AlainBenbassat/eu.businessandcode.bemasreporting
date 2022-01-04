@@ -147,7 +147,7 @@ class CRM_Bemasreporting_Form_Report_BounceSummary extends CRM_Report_Form {
           from
             civicrm_relationship rmc
           where
-            rmc.contact_id_a = c.id
+            rmc.contact_id_a = contact_a.id
           and
             rmc.relationship_type_id = $PRIMARY_MEMBER_CONTACT
           and
@@ -164,7 +164,7 @@ class CRM_Bemasreporting_Form_Report_BounceSummary extends CRM_Report_Form {
           from
             civicrm_relationship rmc
           where
-            rmc.contact_id_a = c.id
+            rmc.contact_id_a = contact_a.id
           and
             rmc.relationship_type_id = $MEMBER_CONTACT
           and
@@ -182,7 +182,7 @@ class CRM_Bemasreporting_Form_Report_BounceSummary extends CRM_Report_Form {
           from
             civicrm_relationship rmc
           where
-            rmc.contact_id_a = c.id
+            rmc.contact_id_a = contact_a.id
           and
             rmc.relationship_type_id in ($PRIMARY_MEMBER_CONTACT, $MEMBER_CONTACT)
           and
