@@ -82,7 +82,7 @@ class CRM_Bemasreporting_Form_Report_BounceSummary extends CRM_Report_Form {
 
     $sql = $this->buildQuery(TRUE);
 
-    $rows = array();
+    $rows = [];
     $this->buildRows($sql, $rows);
 
     $this->formatDisplay($rows);
@@ -127,29 +127,67 @@ class CRM_Bemasreporting_Form_Report_BounceSummary extends CRM_Report_Form {
         COUNT(contact_a.id)
       FROM
         civicrm_contact contact_a
-        LEFT OUTER JOIN civicrm_email contact_email
+      LEFT OUTER JOIN civicrm_email contact_email
           ON contact_a.id = contact_email.contact_id
           AND contact_email.is_primary = 1
-        LEFT OUTER JOIN civicrm_value_individual_details_19
+      LEFT OUTER JOIN civicrm_value_individual_details_19
           ON civicrm_value_individual_details_19.entity_id = contact_a.id
       WHERE contact_a.contact_type = 'Individual'
         AND contact_a.is_deleted = 0
         AND contact_email.on_hold = 1
+        AND contact_email.hold_date >= date_add(NOW(), INTERVAL -3 YEAR)
     ";
 
     if ($memberContact == 'm1') {
-      $sql .= " AND 
-        civicrm_value_individual_details_19.types_of_member_contact_60  = 'M1 - Primary member contact' 
+      $PRIMARY_MEMBER_CONTACT = 14;
+      $sql .= "
+        and exists (
+          select
+            rmc.id
+          from
+            civicrm_relationship rmc
+          where
+            rmc.contact_id_a = c.id
+          and
+            rmc.relationship_type_id = $PRIMARY_MEMBER_CONTACT
+          and
+            rmc.is_active = 1
+        )
       ";
     }
     else if ($memberContact == 'mc') {
-      $sql .= " AND 
-        civicrm_value_individual_details_19.types_of_member_contact_60  = 'Mc - Member contact' 
+      $MEMBER_CONTACT = 15;
+      $sql .= "
+        and exists (
+          select
+            rmc.id
+          from
+            civicrm_relationship rmc
+          where
+            rmc.contact_id_a = c.id
+          and
+            rmc.relationship_type_id = $MEMBER_CONTACT
+          and
+            rmc.is_active = 1
+        )
       ";
     }
     else if ($memberContact == 'mx') {
-      $sql .= " AND 
-        civicrm_value_individual_details_19.types_of_member_contact_60  = 'Mx - Ex-member contact' 
+      $PRIMARY_MEMBER_CONTACT = 14;
+      $MEMBER_CONTACT = 15;
+      $sql .= " AND
+        exists (
+          select
+            rmc.id
+          from
+            civicrm_relationship rmc
+          where
+            rmc.contact_id_a = c.id
+          and
+            rmc.relationship_type_id in ($PRIMARY_MEMBER_CONTACT, $MEMBER_CONTACT)
+          and
+            rmc.is_active = 0
+        )
       ";
     }
 
