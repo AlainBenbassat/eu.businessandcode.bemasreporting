@@ -60,8 +60,6 @@ class CRM_Bemasreporting_Form_Search_BemasMagazine extends CRM_Contact_Form_Sear
     $from = "
       FROM
         civicrm_contact contact_a
-      INNER JOIN
-        civicrm_value_individual_details_19 indiv on indiv.entity_id = contact_a.id
       LEFT OUTER JOIN
         civicrm_value_magazine_41 magpref on magpref.entity_id = contact_a.id
       LEFT OUTER JOIN
@@ -78,6 +76,13 @@ class CRM_Bemasreporting_Form_Search_BemasMagazine extends CRM_Contact_Form_Sear
   }
 
   function where($includeContactIDs = FALSE) {
+    $PRIMARY_MEMBER_CONTACT = 14;
+    $MEMBER_CONTACT = 15;
+    $STATUS_NEW = 1;
+    $STATUS_CURRENT = 2;
+    $STATUS_GRACE = 3;
+    $STATUS_RESIGNING = 10;
+
     $where = "
         contact_a.is_deleted = 0
       and
@@ -95,12 +100,21 @@ class CRM_Bemasreporting_Form_Search_BemasMagazine extends CRM_Contact_Form_Sear
           and
             m.membership_type_id between 1 and 10
           and
-            m.start_date <= NOW()
-          and
-            m.end_date >= NOW()
+            m.status_id in ($STATUS_NEW, $STATUS_CURRENT, $STATUS_GRACE, $STATUS_RESIGNING)
         )
       and
-        indiv.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact')
+        exists (
+          select
+            rmc.id
+          from
+            civicrm_relationship rmc
+          where
+            rmc.contact_id_a = contact_a.id
+          and
+            rmc.relationship_type_id in ($PRIMARY_MEMBER_CONTACT, $MEMBER_CONTACT)
+          and
+            rmc.is_active = 1
+        )
       and
         ifnull(magpref.versturen_naar_149, 1) in (1, 2)
     ";
