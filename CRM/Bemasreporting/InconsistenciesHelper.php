@@ -17,6 +17,9 @@ class CRM_Bemasreporting_InconsistenciesHelper {
   }
 
   function addQueries() {
+    $PRIMARY_MEMBER_CONTACT = 14;
+    $MEMBER_CONTACT = 15;
+
     $index = 0;
 
     // namen zonder hoofdletters
@@ -85,12 +88,21 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->label = 'Persoon is (Primary) Member Contact, maar heeft geen lidmaatschap';
     $q->index = $index;
     $q->from = "civicrm_contact contact_a
-      INNER JOIN
-        civicrm_value_individual_details_19 indiv on indiv.entity_id = contact_a.id
     ";
     $q->where = "
       contact_a.contact_type = 'Individual'
-      and indiv.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact')
+      and exists (
+        select
+          rmc.id
+        from
+          civicrm_relationship rmc
+        where
+          rmc.contact_id_a = contact_a.id
+        and
+          rmc.relationship_type_id in ($PRIMARY_MEMBER_CONTACT, $MEMBER_CONTACT)
+        and
+          rmc.is_active = 1
+      )
       and not exists (
         select
           m.id
