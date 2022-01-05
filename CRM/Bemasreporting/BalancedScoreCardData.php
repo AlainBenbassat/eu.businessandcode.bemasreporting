@@ -22,6 +22,8 @@ class CRM_Bemasreporting_BalancedScoreCardData {
   }
 
   public function getNewMemberContactCount($year) {
+    $PRIMARY_MEMBER_CONTACT = 14;
+    $MEMBER_CONTACT = 15;
     $sql = "
       select
         {$this->selectColumns}
@@ -29,13 +31,22 @@ class CRM_Bemasreporting_BalancedScoreCardData {
         civicrm_membership m
       inner JOIN
         civicrm_contact c on m.contact_id = c.id
-      inner JOIN
-        civicrm_value_individual_details_19 cd on c.id = cd.entity_id
       where
         m.start_date between '$year-01-01' and '$year-12-30'
         and c.contact_type = 'Individual'
         and c.is_deleted = 0
-        and cd.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact')
+        and exists (
+          select
+            rmc.id
+          from
+            civicrm_relationship rmc
+          where
+            rmc.contact_id_a = c.id
+          and
+            rmc.relationship_type_id in ($PRIMARY_MEMBER_CONTACT, $MEMBER_CONTACT)
+          and
+            rmc.is_active = 1
+        )
     ";
 
     $n = $this->getCountOrSql($sql);
@@ -44,6 +55,8 @@ class CRM_Bemasreporting_BalancedScoreCardData {
 
   public function getTerminatedMemberContactCount($year) {
     $previousYear = $year - 1;
+    $PRIMARY_MEMBER_CONTACT = 14;
+    $MEMBER_CONTACT = 15;
     $sql = "
       select
         {$this->selectColumns}
@@ -53,14 +66,23 @@ class CRM_Bemasreporting_BalancedScoreCardData {
         civicrm_membership_status s on m.status_id = s.id
       inner JOIN
         civicrm_contact c on m.contact_id = c.id
-      inner JOIN
-        civicrm_value_individual_details_19 cd on c.id = cd.entity_id
       where
         m.end_date between '$previousYear-12-31' and '$year-12-30'
         and s.name in ('Retired/Deceased', 'Terminated', 'Bankrupt/Activity ceased', 'Cancelled', 'Expired')
         and c.contact_type = 'Individual'
         and c.is_deleted = 0
-        and cd.types_of_member_contact_60 in ('Mx - Ex-member contact')
+        and exists (
+          select
+            rmc.id
+          from
+            civicrm_relationship rmc
+          where
+            rmc.contact_id_a = c.id
+          and
+            rmc.relationship_type_id in ($PRIMARY_MEMBER_CONTACT, $MEMBER_CONTACT)
+          and
+            rmc.is_active = 0
+        )
     ";
 
     $n = $this->getCountOrSql($sql);
@@ -75,6 +97,8 @@ class CRM_Bemasreporting_BalancedScoreCardData {
   }
 
   public function getTotalMemberContactCount($year) {
+    $PRIMARY_MEMBER_CONTACT = 14;
+    $MEMBER_CONTACT = 15;
     $sql = "
       select
         {$this->selectColumns}
@@ -82,14 +106,23 @@ class CRM_Bemasreporting_BalancedScoreCardData {
         civicrm_membership m
       inner JOIN
         civicrm_contact c on m.contact_id = c.id
-      inner JOIN
-        civicrm_value_individual_details_19 cd on c.id = cd.entity_id
       where
         m.start_date <= '$year-12-30'
         and m.end_date >= '$year-12-31'
         and c.contact_type = 'Individual'
         and c.is_deleted = 0
-        and cd.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact')
+                and exists (
+          select
+            rmc.id
+          from
+            civicrm_relationship rmc
+          where
+            rmc.contact_id_a = c.id
+          and
+            rmc.relationship_type_id in ($PRIMARY_MEMBER_CONTACT, $MEMBER_CONTACT)
+          and
+            rmc.is_active = 1
+        )
     ";
 
     $n = $this->getCountOrSql($sql);
@@ -369,6 +402,8 @@ class CRM_Bemasreporting_BalancedScoreCardData {
     }
 
     // get the total number of member contacts
+    $PRIMARY_MEMBER_CONTACT = 14;
+    $MEMBER_CONTACT = 15;
     $sql = "
       select
         {$this->selectColumns}
@@ -376,14 +411,23 @@ class CRM_Bemasreporting_BalancedScoreCardData {
         civicrm_membership m
       inner JOIN
         civicrm_contact c on m.contact_id = c.id
-      inner JOIN
-        civicrm_value_individual_details_19 cd on c.id = cd.entity_id
       where
         m.start_date <= '$year-12-30'
         and m.end_date >= '$year-12-31'
         and c.contact_type = 'Individual'
         and c.is_deleted = 0
-        and cd.types_of_member_contact_60 in ('M1 - Primary member contact', 'Mc - Member contact')
+        and exists (
+          select
+            rmc.id
+          from
+            civicrm_relationship rmc
+          where
+            rmc.contact_id_a = c.id
+          and
+            rmc.relationship_type_id in ($PRIMARY_MEMBER_CONTACT, $MEMBER_CONTACT)
+          and
+            rmc.is_active = 1
+        )
     ";
 
     // add language clause
