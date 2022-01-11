@@ -531,14 +531,14 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->index = $index;
     $q->from = "civicrm_contact contact_a
       inner join
-        civicrm_email e on contact_a.id = e.contact_id and e.is_primary = 1
+        civicrm_email e1 on contact_a.id = e1.contact_id and e1.is_primary = 1
     ";
     $q->where = "
         contact_a.contact_type = 'Individual'
       and
         contact_a.is_deleted = 0
       and
-        e.email in
+        e1.email in
         (
           select
             e2.email
@@ -551,7 +551,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
           and
             c2.is_deleted = 0
           and
-            e2.email = e.email
+            e2.email = e1.email
           and
             c2.id <> contact_a.id
         )
