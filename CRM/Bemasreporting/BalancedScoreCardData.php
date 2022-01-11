@@ -231,13 +231,13 @@ class CRM_Bemasreporting_BalancedScoreCardData {
       inner JOIN
         civicrm_contact c on m.contact_id = c.id
       inner JOIN
-        civicrm_value_membership_15 mc on c.id = mc.entity_id
+        civicrm_value_lidmaatschap__35 mc on c.id = mc.entity_id
       where
         m.start_date <= '$year-12-30'
         and m.end_date >= '$year-12-31'
         and m.owner_membership_id is null
         and c.is_deleted = 0
-        and mc.membership_type_58 = 2
+        and mc.membership_type_161 = 2
     ";
 
     $n = $this->getCountOrSql($sql);
@@ -255,13 +255,13 @@ class CRM_Bemasreporting_BalancedScoreCardData {
       inner JOIN
         civicrm_contact c on m.contact_id = c.id
       inner JOIN
-        civicrm_value_membership_15 mc on c.id = mc.entity_id
+        civicrm_value_lidmaatschap__35 mc on c.id = mc.entity_id
       where
         m.start_date <= '$year-12-30'
         and m.end_date >= '$year-12-31'
         and m.owner_membership_id is null
         and c.is_deleted = 0
-        and mc.membership_type_58 = 1
+        and mc.membership_type_161 = 1
     ";
 
     $n = $this->getCountOrSql($sql);
