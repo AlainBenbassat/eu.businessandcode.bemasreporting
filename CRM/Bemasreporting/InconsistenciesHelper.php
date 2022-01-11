@@ -524,5 +524,41 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queries[$index] = $q;
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
+
+    // primaire e-mailadres ook in gebruik bij iemand anders
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Niet unieke primaire e-mailadressen';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a
+      inner join
+        civicrm_email e on contact_a.id = e.contact_id and e.is_primary = 1
+    ";
+    $q->where = "
+        contact_a.contact_type = 'Individual'
+      and
+        contact_a.is_deleted = 0
+      and
+        e.email in
+        (
+          select
+            e2.email
+          FROM
+            civicrm_contact c2
+          inner join
+            civicrm_email e2 on c2.id = e2.contact_id and e2.is_primary = 1
+          WHERE
+            c2.contact_type = 'Individual'
+          and
+            c2.is_deleted = 0
+          and
+            e2.email = e.email
+          and
+            c2.id <> contact_a.id
+        )
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
+
   }
 }
