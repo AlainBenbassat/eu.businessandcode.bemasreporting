@@ -560,5 +560,28 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $this->queriesRadioButtons[$q->index] = $q->label;
     $index++;
 
+    // deelnames met status "pending (incomplete transaction)"
+    $q = new BemasInconsistenciesQuery();
+    $q->label = 'Deelnames met status "In behandeling (onvolledige transactie)"';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a
+    ";
+    $q->where = "
+      contact_a.is_deleted = 0
+      and contact_a.contact_type = 'Individual'
+      and exists (
+        select
+          p.id
+        from
+          civicrm_participant p
+        where
+          p.contact_id = contact_a.id
+        and
+          p.status_id = 6
+      )
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
   }
 }
