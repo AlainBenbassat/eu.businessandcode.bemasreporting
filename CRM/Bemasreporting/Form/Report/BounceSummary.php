@@ -114,91 +114,31 @@ class CRM_Bemasreporting_Form_Report_BounceSummary extends CRM_Report_Form {
       $rows[3 + $i]['civicrm_contact_lang_total'] = $this->getNumBounces('', $funcArr[$i], '');
     }
 
-    $url  = CRM_Utils_System::url('civicrm/contact/search/custom', array('csid' => 17, 'reset'=> 1));
-    $rows[3 + $i]['civicrm_contact_types_of_member_contact_60'] = '<strong>Totaal</strong>';
-    $rows[3 + $i]['civicrm_contact_lang_nl'] = $this->getNumBounces('', '', 'nl');
-    $rows[3 + $i]['civicrm_contact_lang_fr'] = $this->getNumBounces('', '', 'fr');
-    $rows[3 + $i]['civicrm_contact_lang_total'] = "<a href=\"$url\">" . $this->getNumBounces('', '', '') . "</a>";
+    $i = $i + 3;
+    $rows[$i]['civicrm_contact_types_of_member_contact_60'] = '<strong>Totaal</strong>';
+    $rows[$i]['civicrm_contact_lang_nl'] = $this->getNumBounces('', '', 'nl');
+    $rows[$i]['civicrm_contact_lang_fr'] = $this->getNumBounces('', '', 'fr');
+    $rows[$i]['civicrm_contact_lang_total'] = $this->getNumBounces('', '', '');
+    $i++;
+
+    $url  = CRM_Utils_System::url('civicrm/contact/search/custom', ['csid' => 17, 'reset'=> 1]);
+    $rows[$i]['civicrm_contact_types_of_member_contact_60'] = "<a href=\"$url\">Ga naar het detailrapport</a>";
+    $rows[$i]['civicrm_contact_lang_nl'] = '';
+    $rows[$i]['civicrm_contact_lang_fr'] = '';
+    $rows[$i]['civicrm_contact_lang_total'] = '';
   }
 
-  private function getNumBounces($memberContact, $BemansFunction, $lang) {
-    $sql = "
-      SELECT
-        COUNT(contact_a.id)
-      FROM
-        civicrm_contact contact_a
-      LEFT OUTER JOIN civicrm_email contact_email
-          ON contact_a.id = contact_email.contact_id
-          AND contact_email.is_primary = 1
-      LEFT OUTER JOIN civicrm_value_individual_details_19
-          ON civicrm_value_individual_details_19.entity_id = contact_a.id
-      WHERE contact_a.contact_type = 'Individual'
-        AND contact_a.is_deleted = 0
-        AND contact_email.on_hold = 1
-        AND contact_email.hold_date >= date_add(NOW(), INTERVAL -3 YEAR)
-    ";
+  private function getNumBounces($memberContact, $bemasFunction, $lang) {
+    $sql = CRM_Bemasreporting_BounceSummaryHelper::getSelectForCount($memberContact, $bemasFunction, $lang);
+    $num = CRM_Core_DAO::singleValueQuery($sql);
 
-    if ($memberContact == 'm1') {
-      $PRIMARY_MEMBER_CONTACT = 14;
-      $sql .= "
-        and exists (
-          select
-            rmc.id
-          from
-            civicrm_relationship rmc
-          where
-            rmc.contact_id_a = contact_a.id
-          and
-            rmc.relationship_type_id = $PRIMARY_MEMBER_CONTACT
-          and
-            rmc.is_active = 1
-        )
-      ";
-    }
-    else if ($memberContact == 'mc') {
-      $MEMBER_CONTACT = 15;
-      $sql .= "
-        and exists (
-          select
-            rmc.id
-          from
-            civicrm_relationship rmc
-          where
-            rmc.contact_id_a = contact_a.id
-          and
-            rmc.relationship_type_id = $MEMBER_CONTACT
-          and
-            rmc.is_active = 1
-        )
-      ";
-    }
-    else if ($memberContact == 'mx') {
-      $PRIMARY_MEMBER_CONTACT = 14;
-      $MEMBER_CONTACT = 15;
-      $sql .= " AND
-        exists (
-          select
-            rmc.id
-          from
-            civicrm_relationship rmc
-          where
-            rmc.contact_id_a = contact_a.id
-          and
-            rmc.relationship_type_id in ($PRIMARY_MEMBER_CONTACT, $MEMBER_CONTACT)
-          and
-            rmc.is_active = 0
-        )
-      ";
-    }
-
-    if ($BemansFunction) {
-      $sql .= " AND civicrm_value_individual_details_19.function_28 = '$BemansFunction'";
-    }
-
-    if ($lang) {
-      $sql .= " AND substring(contact_a.preferred_language, -2) = '$lang'";
-    }
-
-    return CRM_Core_DAO::singleValueQuery($sql);
+    $urlParams = [
+      'reset'=> 1,
+      'member' => $memberContact,
+      'function' => $bemasFunction,
+      'lang' => $lang,
+    ];
+    $url  = CRM_Utils_System::url('civicrm/bounce_summary_detail', $urlParams);
+    return "<a href=\"$url\">$num</a>";
   }
 }

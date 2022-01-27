@@ -130,7 +130,13 @@ class CRM_Bemasreporting_Form_Search_BounceList extends CRM_Contact_Form_Search_
 
   function where($includeContactIDs = FALSE) {
     $params = [];
-    $where = "contact_a.contact_type = 'Individual' and contact_a.is_deleted = 0 and contact_email.on_hold = 1";
+    $where = "
+        contact_a.contact_type = 'Individual'
+      and
+        contact_a.is_deleted = 0
+      and
+        contact_email.on_hold = 1
+    ";
 
     $count  = 1;
     $clause = [];
