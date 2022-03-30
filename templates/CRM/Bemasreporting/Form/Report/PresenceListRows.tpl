@@ -10,14 +10,36 @@
             <td style="text-align: center; font-weight: bold; font-size: 1.3em; font-family: Arial Narrow">{$eventTitle}</td>
             <td width="20%" style="text-align: right"><img width="150" src="https://www.bemas.org/sites/default/files/bemas/bemas_logo_200.jpg"></td>
         </tr>
-        <tr>
-            <td colspan="3" style="font-family: Arial Narrow">
-                <br>
-                {$eventSpeakers}<br>
-                {$eventCoaches}<br>
-            </td>
-        </tr>
     </table>
+
+    <table class="report-layout display" style="{$bemasTableStyle}">
+      <thead>
+        <tr>
+          <th style="{$bemasColHeaderStyle}"></th>
+          <th style="{$bemasColHeaderStyle}">{$columnHeaders.civicrm_contact_first_name.title}</th>
+          <th style="{$bemasColHeaderStyle}">{$columnHeaders.civicrm_contact_last_name.title}</th>
+          <th style="{$bemasColHeaderStyle}">{$columnHeaders.civicrm_contact_signature.title}</th>
+          <th style="{$bemasColHeaderStyle}"></th>
+          <th style="{$bemasColHeaderStyle}"></th>
+          <th style="{$bemasColHeaderStyle}"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {foreach from=$eventSpeakers item=row key=rowid}
+          <tr  class="{cycle values="odd-row,even-row"} crm-report">
+            <td style="{$bemasCellStyle}">{$row.role}</td>
+            <td style="{$bemasCellStyle}">{$row.first_name}</td>
+            <td style="{$bemasCellStyle}">{$row.last_name}</td>
+            <td style="{$bemasCellStyle}">&nbsp;</td>
+            <td style="{$bemasCellStyle}">&nbsp;</td>
+            <td style="{$bemasCellStyle}">&nbsp;</td>
+            <td style="{$bemasCellStyle}">&nbsp;</td>
+          </tr>
+        {/foreach}
+      </tbody>
+    </table>
+
+    <p>&nbsp;</p>
 
     <table class="report-layout display" style="{$bemasTableStyle}">
     {capture assign="tableHeader"}
@@ -35,7 +57,7 @@
                     {assign var=skipCount value=`$header.colspan`}
                     {assign var=skipMade  value=1}
                 {else}
-                    <th {$class} style="{$bemasColHeaderStyle}">{$header.title}</th>
+                    <th style="{$bemasColHeaderStyle}">{$header.title}</th>
                     {assign var=skip value=false}
                 {/if}
             {else} {* for skip case *}

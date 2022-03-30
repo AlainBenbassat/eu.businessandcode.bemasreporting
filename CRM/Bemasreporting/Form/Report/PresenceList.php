@@ -2,114 +2,87 @@
 
 class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
   protected $_summary = NULL;
-  private $translations = [];
+  private $eventId = 0;
+  private $eventTitle = '';
+  private $eventStartDate = '';
+  private $eventDates = [];
+  private $eventHours = '';
+
 
   function __construct() {
-    // see if we have an event id
-    if (($event_id = CRM_Utils_Request::retrieve('event_id', 'Positive'))) {
-       // OK, found in the url
-       $_SESSION['event_value'] = $event_id;
-    }
-    else {
-      // not found, check submit values
-      $event_id = $this->getSelectedParam('event_value');
-      if (!$event_id) {
-        $event_id = 0;
-      }
-    }
+    $this->storeEventId();
+    $this->storeEventDefaults();
 
-    $this->_columns = array(
-      'civicrm_contact' => array(
+    $this->_columns = [
+      'civicrm_contact' => [
         'dao' => 'CRM_Contact_DAO_Contact',
-        'fields' => array(
-          'id' => array(
+        'fields' => [
+          'id' => [
             'no_display' => TRUE,
             'required' => TRUE,
-          ),
-          'first_name' => array(
+          ],
+          'first_name' => [
             'title' => ts('First Name'),
             'required' => TRUE,
-          ),
-          'last_name' => array(
+          ],
+          'last_name' => [
             'title' => ts('Last Name'),
             'required' => TRUE,
-          ),
-          'job_title' => array(
+          ],
+          'job_title' => [
             'title' => ts('Job Title'),
             'required' => TRUE,
-          ),
-          'organization_name' => array(
+          ],
+          'organization_name' => [
             'title' => ts('Employer'),
             'required' => TRUE,
-          ),
-          'newsletter' => array(
+          ],
+          'newsletter' => [
             'title' => 'Ontvangt graag<br>BEMAS nieuwsbrief',
             'required' => TRUE,
             'dbAlias' => "'&nbsp;Ja&nbsp;&nbsp;|&nbsp;&nbsp;Nee&nbsp;'",
-          ),
-          'sharecontact' => array(
+          ],
+          'sharecontact' => [
             'title' => 'Toestemming voor delen<br>contactgegevens met<br>derden (bv. spreker)',
             'required' => TRUE,
             'dbAlias' => "'&nbsp;Ja&nbsp;&nbsp;|&nbsp;&nbsp;Nee&nbsp;'",
-          ),
-          'signature' => array(
+          ],
+          'signature' => [
             'title' => 'Handtekening',
             'required' => TRUE,
             'dbAlias' => "'<br><br><br>'",
-          ),
-        ),
-        'filters' => array(
-          'event' => array(
+          ],
+        ],
+        'filters' => [
+          'event' => [
             'title' => ts('Event'),
             'type' => CRM_Utils_Type::T_INT,
             'operatorType' => CRM_Report_Form::OP_SELECT,
-            'options' => $this->getEventList($event_id),
+            'options' => $this->getEventList(),
             'required' => TRUE,
-          ),
-          'language' => array(
+          ],
+          'language' => [
             'title' => ts('Language'),
             'type' => CRM_Utils_Type::T_STRING,
             'operatorType' => CRM_Report_Form::OP_SELECT,
             'options' => ['nl' => 'Nederlands', 'fr' => 'Français', 'en' => 'English'],
             'default' => 'en',
             'required' => TRUE,
-          ),
-        ),
-      )
-    );
-
-    // set translations
-    $this->translations['id']['nl'] = 'id';
-    $this->translations['id']['fr'] = 'id';
-    $this->translations['id']['en'] = 'id';
-
-    $this->translations['first_name']['nl'] = 'Voornaam';
-    $this->translations['first_name']['fr'] = 'Prénom';
-    $this->translations['first_name']['en'] = 'First Name';
-
-    $this->translations['last_name']['nl'] = 'Achternaam';
-    $this->translations['last_name']['fr'] = 'Nom';
-    $this->translations['last_name']['en'] = 'Last Name';
-
-    $this->translations['job_title']['nl'] = 'Functie';
-    $this->translations['job_title']['fr'] = 'Fonction';
-    $this->translations['job_title']['en'] = 'Function';
-
-    $this->translations['organization_name']['nl'] = 'Werkgever';
-    $this->translations['organization_name']['fr'] = 'Employeur';
-    $this->translations['organization_name']['en'] = 'Employer';
-
-    $this->translations['newsletter']['nl'] = 'Ontvangt graag<br>BEMAS nieuwsbrief';
-    $this->translations['newsletter']['fr'] = 'Recevoir la<br>BEMAS newsletter?';
-    $this->translations['newsletter']['en'] = 'Receive<br>BEMAS newsletter?';
-
-    $this->translations['sharecontact']['nl'] = 'Toestemming voor delen<br>contactgegevens met derden<br>(bv. spreker)';
-    $this->translations['sharecontact']['fr'] = 'Permission de partager<br>mes données avec<br>partenaires (p.ex. orateur)';
-    $this->translations['sharecontact']['en'] = 'Permission to share<br>my data with partners<br>(e.g. speaker)';
-
-    $this->translations['signature']['nl'] = 'Handtekening';
-    $this->translations['signature']['fr'] = 'Signature';
-    $this->translations['signature']['en'] = 'Signature';
+          ],
+          'sign_date' => [
+            'title' => 'Datum op lijst',
+            'type' => CRM_Utils_Type::T_STRING,
+            'operatorType' => CRM_Report_Form::OP_SELECT,
+            'options' => $this->eventDates,
+          ],
+          'sign_hour' => [
+            'title' => 'Van / tot',
+            'type' => CRM_Utils_Type::T_STRING,
+            'default' => $this->eventHours,
+          ],
+        ],
+      ]
+    ];
 
     parent::__construct();
   }
@@ -120,7 +93,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
   }
 
   function select() {
-    $select = $this->_columnHeaders = array();
+    $select = $this->_columnHeaders = [];
 
     foreach ($this->_columns as $tableName => $table) {
       if (array_key_exists('fields', $table)) {
@@ -173,33 +146,34 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
   }
 
   function postProcess() {
-    // translate column labels
-    $lang = $this->getSelectedParam('language_value');
-    if ($lang) {
-      $this->translateColumnHeaders($lang);
-    }
+    $this->translateColumnHeaders();
 
     $this->beginPostProcess();
 
-    // get the acl clauses built before we assemble the query
-    $this->buildACLClause($this->_aliases['civicrm_contact']);
     $sql = $this->buildQuery(TRUE);
 //die($sql);
-    $rows = array();
+    $rows = [];
     $this->buildRows($sql, $rows);
 
-    // get the selected event
-    $params = ['id' => $this->getSelectedParam('event_value')];
-    $event = civicrm_api3('Event', 'getsingle', $params);
-    $eventDate = date_format(date_create($event['start_date']), 'd/m/Y');
-    $this->assign('eventTitle', $event['title']);
-    $this->assign('eventDate', $eventDate);
+    $eventDateIndex = $this->getSelectedParam('sign_date_value');
+    if ($eventDateIndex) {
+      $eventDate = $this->eventDates[$eventDateIndex];
+    }
+    else {
+      $eventDate = $this->eventStartDate;
+    }
+
+    $eventHours = $this->getSelectedParam('sign_hour_value');
+    if (!$eventHours) {
+      $eventHours = $this->eventHours;
+    }
+
+    $this->assign('eventTitle', $this->eventTitle);
+    $this->assign('eventDate', $eventDate . ' ' . $eventHours);
 
     // get the special roles
-    $speakers = $this->getEventSpecialRoles(4, $this->getSelectedParam('event_value'), $this->getSelectedParam('language_value'));
-    $coaches = $this->getEventSpecialRoles(3, $this->getSelectedParam('event_value'), $this->getSelectedParam('language_value'));
+    $speakers = $this->getEventSpecialRoles();
     $this->assign('eventSpeakers', $speakers);
-    $this->assign('eventCoaches', $coaches);
 
     $this->formatDisplay($rows);
     $this->doTemplateAssignment($rows);
@@ -207,18 +181,8 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
   }
 
   function alterDisplay(&$rows) {
-    if ($this->getSelectedParam('language_value') == 'nl') {
-      $yes = 'Ja';
-      $no = 'Nee';
-    }
-    else if ($this->getSelectedParam('language_value') == 'fr') {
-      $yes = 'Oui';
-      $no = 'Non';
-    }
-    else {
-      $yes = 'Yes';
-      $no = 'No';
-    }
+    $yes = $this->getLabelForYes();
+    $no = $this->getLabelForNo();
 
     for ($i = 0; $i < count($rows); $i++) {
       $rows[$i]['civicrm_contact_newsletter'] = "&nbsp;$yes&nbsp;&nbsp;|&nbsp;&nbsp;$no&nbsp;";
@@ -226,7 +190,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
     }
   }
 
-  function getEventList($event_id) {
+  function getEventList() {
     $eventList = [];
 
     $sql = "
@@ -242,9 +206,9 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
       WHERE
     ";
 
-    if ($event_id > 0) {
+    if ($this->eventId > 0) {
       // we have a default event, select it
-      $sql .= " id = $event_id";
+      $sql .= ' id = ' . $this->eventId;
     }
     else {
       // select all events
@@ -271,7 +235,7 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
     elseif (array_key_exists($name, $this->_submitValues) && $this->_submitValues[$name]) {
       return $this->_submitValues[$name];
     }
-    elseif ($_SESSION['event_value']) {
+    elseif ($name == 'event_value' && $_SESSION['event_value']) {
        return $_SESSION['event_value'];
     }
     else {
@@ -279,62 +243,207 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
     }
   }
 
-  function getEventSpecialRoles($roleID, $eventID, $lang) {
-    $label = '';
+  function getEventSpecialRoles() {
+    $sql1 = $this->getEventSpecialRolesQuery('trainers');
+    $sql2 = $this->getEventSpecialRolesQuery('coaches');
 
-    if ($roleID == 3) {
-      if ($lang == 'nl') {
-        $label = 'Begeleider(s): ';
-      }
-      else if ($lang == 'fr') {
-        $label = 'Accompagnateur(s): ';
-      }
-      else {
-        $label = 'Coach(es): ';
-      }
-
-      $roleIdClause = "role_id like '%$roleID%'";
+    $names = [];
+    $dao = CRM_Core_DAO::executeQuery($sql1 . ' union all ' . $sql2);
+    while ($dao->fetch()) {
+      $names[] = [
+        'role' => $dao->role,
+        'first_name' => $dao->first_name,
+        'last_name' => $dao->last_name,
+      ];
     }
-    elseif ($roleID == 4) {
-      if ($lang == 'nl') {
-        $label = 'Spreker(s)/lesgever(s): ';
-      }
-      elseif ($lang == 'fr') {
-        $label = 'Orateur(s)/formateur(s): ';
-      }
-      else {
-        $label = 'Speaker(s)/trainer(s): ';
-      }
 
+    return $names;
+  }
+
+  private function getEventSpecialRolesQuery($type) {
+    if ($type == 'coaches') {
+      $label = $this->getLabelForCoaches();
+      $roleIdClause = "role_id like '%3%'";
+    }
+    else {
+      $label = $this->getLabelForTrainers();
       $roleIdClause = "(role_id like '%4%' or role_id like '%6%')";
     }
 
     $sql = "
       select
-        concat(c.first_name, ' ', c.last_name) names
+        '$label' role,
+        c.first_name,
+        c.last_name
       from
         civicrm_participant p
       inner join
         civicrm_contact c on p.contact_id = c.id
       where
-        $roleIdClause and event_id = $eventID
+        $roleIdClause
+        and event_id = {$this->eventId}
         and status_id in (1, 2, 5)
-      order by
-        sort_name
     ";
 
-    $names = [];
-    $dao = CRM_Core_DAO::executeQuery($sql);
-    while ($dao->fetch()) {
-      $names[] = $dao->names;
-    }
-
-    return $label . implode(', ', $names);
+    return $sql;
   }
 
-  function translateColumnHeaders($lang) {
-    foreach ($this->_columns['civicrm_contact']['fields'] as $k => $v) {
-      $this->_columns['civicrm_contact']['fields'][$k]['title'] = $this->translations[$k][$lang];
+  private function storeEventId() {
+    // see if we have an event id in the url
+    if (($event_id = CRM_Utils_Request::retrieve('event_id', 'Positive'))) {
+      // OK, store in the session
+      $_SESSION['event_value'] = $event_id;
+    }
+    else {
+      // not found, check submit values
+      $event_id = $this->getSelectedParam('event_value');
+      if (!$event_id) {
+        $event_id = 0;
+      }
+    }
+
+    $this->eventId = $event_id;
+  }
+
+  private function storeEventDefaults() {
+    if ($this->eventId) {
+      $event = civicrm_api3('Event', 'getsingle', ['id' => $this->eventId]);
+      $this->eventTitle = $event['title'];
+      $this->eventStartDate = CRM_Utils_Date::customFormat($event['start_date'], '%d/%m/%Y');
+      $this->eventHours = CRM_Utils_Date::customFormat($event['start_date'], '%H:%i') . ' - ' . CRM_Utils_Date::customFormat($event['end_date'], '%H:%i');
+      $this->eventDates = $this->getExtraEventDates($this->eventStartDate, $event);
+    }
+    else {
+      $this->eventStartDate = '';
+      $this->eventDates = [];
+      $this->eventHours = '';
+      $this->eventTitle = '';
     }
   }
+
+  private function getExtraEventDates($eventStartDate, $event) {
+    $dateList = [];
+
+    $dateList[] = $eventStartDate;
+
+    $customFieldFromId = 169;
+    $customFieldToId = 173;
+
+    for ($i = $customFieldFromId; $i <= $customFieldToId; $i++) {
+      if (!empty($event["custom_$i"])) {
+        $formattedDate = CRM_Utils_Date::customFormat($event["custom_$i"], '%d/%m/%Y');
+        if ($formattedDate != $eventStartDate) {
+          $dateList[] = $formattedDate;
+        }
+      }
+    }
+
+    return $dateList;
+  }
+
+  function translateColumnHeaders() {
+    $lang = $this->getSelectedParam('language_value');
+    if ($lang) {
+      $translations = $this->getLabelTranslations();
+
+      foreach ($this->_columns['civicrm_contact']['fields'] as $k => $v) {
+        $this->_columns['civicrm_contact']['fields'][$k]['title'] = $translations[$k][$lang];
+      }
+    }
+  }
+
+  private function getLabelTranslations() {
+    $translations = [];
+
+    $translations['id']['nl'] = 'id';
+    $translations['id']['fr'] = 'id';
+    $translations['id']['en'] = 'id';
+
+    $translations['first_name']['nl'] = 'Voornaam';
+    $translations['first_name']['fr'] = 'Prénom';
+    $translations['first_name']['en'] = 'First Name';
+
+    $translations['last_name']['nl'] = 'Achternaam';
+    $translations['last_name']['fr'] = 'Nom';
+    $translations['last_name']['en'] = 'Last Name';
+
+    $translations['job_title']['nl'] = 'Functie';
+    $translations['job_title']['fr'] = 'Fonction';
+    $translations['job_title']['en'] = 'Function';
+
+    $translations['organization_name']['nl'] = 'Werkgever';
+    $translations['organization_name']['fr'] = 'Employeur';
+    $translations['organization_name']['en'] = 'Employer';
+
+    $translations['newsletter']['nl'] = 'Ontvangt graag <br>BEMAS nieuwsbrief';
+    $translations['newsletter']['fr'] = 'Recevoir la <br>BEMAS newsletter?';
+    $translations['newsletter']['en'] = 'Receive <br>BEMAS newsletter?';
+
+    $translations['sharecontact']['nl'] = 'Toestemming voor delen <br>contactgegevens met derden <br>(bv. spreker)';
+    $translations['sharecontact']['fr'] = 'Permission de partager <br>mes données avec <br>partenaires (p.ex. orateur)';
+    $translations['sharecontact']['en'] = 'Permission to share <br>my data with partners <br>(e.g. speaker)';
+
+    $translations['signature']['nl'] = 'Handtekening';
+    $translations['signature']['fr'] = 'Signature';
+    $translations['signature']['en'] = 'Signature';
+
+    return $translations;
+  }
+
+  function getLabelForYes() {
+    $lang = $this->getSelectedParam('language_value');
+    if ($lang == 'nl') {
+      return 'Ja';
+    }
+    elseif ($lang == 'fr') {
+      return 'Oui';
+    }
+    else {
+      return 'Yes';
+    }
+  }
+
+  function getLabelForNo() {
+    $lang = $this->getSelectedParam('language_value');
+    if ($lang == 'nl') {
+      return 'Nee';
+    }
+    elseif ($lang == 'fr') {
+      return 'Non';
+    }
+    else {
+      return 'No';
+    }
+  }
+
+  function getLabelForTrainers() {
+    $lang = $this->getSelectedParam('language_value');
+    if ($lang == 'nl') {
+      $label = 'Spreker/lesgever: ';
+    }
+    elseif ($lang == 'fr') {
+      $label = 'Orateur/formateur : ';
+    }
+    else {
+      $label = 'Speaker/trainer: ';
+    }
+
+    return $label;
+  }
+
+  function getLabelForCoaches() {
+    $lang = $this->getSelectedParam('language_value');
+    if ($lang == 'nl') {
+      $label = 'Begeleider: ';
+    }
+    else if ($lang == 'fr') {
+      $label = 'Accompagnateur : ';
+    }
+    else {
+      $label = 'Coach: ';
+    }
+
+    return $label;
+  }
+
 }
