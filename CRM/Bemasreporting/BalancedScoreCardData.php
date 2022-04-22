@@ -214,6 +214,7 @@ class CRM_Bemasreporting_BalancedScoreCardData {
         and m.owner_membership_id is null
         and c.is_deleted = 0
         and c.contact_type = 'Individual'
+        and m.membership_type_id = = 8
     ";
 
     $n = $this->getCountOrSql($sql);
