@@ -68,6 +68,8 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCardDetail extends CRM_Report_
       $str = substr($str,0,$pos + $numChars) . str_replace('SQL_CALC_FOUND_ROWS','', substr($str,$pos + $numChars));
       $this->_select = $str;
     }
+
+    return $this->_select;
   }
 
   private function getEventDashboardFields() {
