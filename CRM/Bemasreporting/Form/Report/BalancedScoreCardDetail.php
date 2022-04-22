@@ -57,6 +57,19 @@ class CRM_Bemasreporting_Form_Report_BalancedScoreCardDetail extends CRM_Report_
   public function alterDisplay(&$rows) {
   }
 
+  public function buildQuery($applyLimit = TRUE) {
+    parent::buildQuery($applyLimit);
+
+    // civi adds too many SQL_CALC_FOUND_ROWS, just keep the first one
+    $str = $this->_select;
+    $pos = strpos($str,'SQL_CALC_FOUND_ROWS');
+    $numChars = strlen('SQL_CALC_FOUND_ROWS');
+    if ($pos !== false) {
+      $str = substr($str,0,$pos + $numChars) . str_replace('SQL_CALC_FOUND_ROWS','', substr($str,$pos + $numChars));
+    }
+    $this->_select = $str;
+  }
+
   private function getEventDashboardFields() {
     $fields = [];
 
