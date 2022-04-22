@@ -12,27 +12,28 @@
         </tr>
     </table>
 
+    <h2 style="{$bemasTableHeaderStyle}">{$labelForSpeakerTable}</h2>
     <table class="report-layout display" style="{$bemasTableStyle}">
       <thead>
         <tr>
-          <th style="{$bemasColHeaderStyle}"></th>
           <th style="{$bemasColHeaderStyle}">{$columnHeaders.civicrm_contact_first_name.title}</th>
           <th style="{$bemasColHeaderStyle}">{$columnHeaders.civicrm_contact_last_name.title}</th>
+          <th style="{$bemasColHeaderStyle}">{$columnHeaders.civicrm_contact_organization_name.title}</th>
+          <th style="{$bemasColHeaderStyle}">{$columnHeaders.civicrm_contact_job_title.title}</th>
+          <th style="{$bemasColHeaderStyle}">{$labelForRole}</th>
+          <th style="{$bemasColHeaderStyle}">{$columnHeaders.civicrm_contact_newsletter.title}</th>
           <th style="{$bemasColHeaderStyle}">{$columnHeaders.civicrm_contact_signature.title}</th>
-          <th style="{$bemasColHeaderStyle}"></th>
-          <th style="{$bemasColHeaderStyle}"></th>
-          <th style="{$bemasColHeaderStyle}"></th>
         </tr>
       </thead>
       <tbody>
         {foreach from=$eventSpeakers item=row key=rowid}
           <tr  class="{cycle values="odd-row,even-row"} crm-report">
-            <td style="{$bemasCellStyle}">{$row.role}</td>
             <td style="{$bemasCellStyle}">{$row.first_name}</td>
             <td style="{$bemasCellStyle}">{$row.last_name}</td>
-            <td style="{$bemasCellStyle}">&nbsp;</td>
-            <td style="{$bemasCellStyle}">&nbsp;</td>
-            <td style="{$bemasCellStyle}">&nbsp;</td>
+            <td style="{$bemasCellStyle}">{$row.organization_name}</td>
+            <td style="{$bemasCellStyle}">{$row.job_title}</td>
+            <td style="{$bemasCellStyle}">{$row.role}</td>
+            <td style="{$bemasCellStyle}">{$row.newsletter}</td>
             <td style="{$bemasCellStyle}">&nbsp;</td>
           </tr>
         {/foreach}
@@ -41,6 +42,7 @@
 
     <p>&nbsp;</p>
 
+    <h2 style="{$bemasTableHeaderStyle}">{$labelForParticipantTable}</h2>
     <table class="report-layout display" style="{$bemasTableStyle}">
     {capture assign="tableHeader"}
         {foreach from=$columnHeaders item=header key=field}

@@ -29,12 +29,12 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
             'title' => ts('Last Name'),
             'required' => TRUE,
           ],
-          'job_title' => [
-            'title' => ts('Job Title'),
-            'required' => TRUE,
-          ],
           'organization_name' => [
             'title' => ts('Employer'),
+            'required' => TRUE,
+          ],
+          'job_title' => [
+            'title' => ts('Job Title'),
             'required' => TRUE,
           ],
           'newsletter' => [
@@ -170,6 +170,9 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
 
     $this->assign('eventTitle', $this->eventTitle);
     $this->assign('eventDate', $eventDate . ' ' . $eventHours);
+    $this->assign('labelForRole', $this->getLabelTranslationForRole());
+    $this->assign('labelForSpeakerTable', $this->getLabelTranslationForSpeakers());
+    $this->assign('labelForParticipantTable', $this->getLabelTranslationForParticipants());
 
     // get the special roles
     $speakers = $this->getEventSpecialRoles();
@@ -254,6 +257,9 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
         'role' => $dao->role,
         'first_name' => $dao->first_name,
         'last_name' => $dao->last_name,
+        'organization_name' => $dao->organization_name,
+        'job_title' => $dao->job_title,
+        'newsletter' => $this->getLabelForYes() . ' | ' . $this->getLabelForNo(),
       ];
     }
 
@@ -274,7 +280,10 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
       select
         '$label' role,
         c.first_name,
-        c.last_name
+        c.last_name,
+        c.job_title,
+        c.organization_name,
+        '' newsletter
       from
         civicrm_participant p
       inner join
@@ -390,6 +399,45 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
     return $translations;
   }
 
+  private function getLabelTranslationForRole() {
+    $lang = $this->getSelectedParam('language_value');
+    if ($lang == 'nl') {
+      return 'Rol';
+    }
+    elseif ($lang == 'fr') {
+      return 'Rôle';
+    }
+    else {
+      return 'Role';
+    }
+  }
+
+  private function getLabelTranslationForSpeakers() {
+    $lang = $this->getSelectedParam('language_value');
+    if ($lang == 'nl') {
+      return 'Organisatie';
+    }
+    elseif ($lang == 'fr') {
+      return 'Organisation';
+    }
+    else {
+      return 'Organization';
+    }
+  }
+
+  private function getLabelTranslationForParticipants() {
+    $lang = $this->getSelectedParam('language_value');
+    if ($lang == 'nl') {
+      return 'Deelnemers';
+    }
+    elseif ($lang == 'fr') {
+      return 'Paticipants';
+    }
+    else {
+      return 'Paticipants';
+    }
+  }
+
   function getLabelForYes() {
     $lang = $this->getSelectedParam('language_value');
     if ($lang == 'nl') {
@@ -419,13 +467,13 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
   function getLabelForTrainers() {
     $lang = $this->getSelectedParam('language_value');
     if ($lang == 'nl') {
-      $label = 'Spreker/lesgever: ';
+      $label = 'Spreker/lesgever';
     }
     elseif ($lang == 'fr') {
-      $label = 'Orateur/formateur : ';
+      $label = 'Orateur/formateur';
     }
     else {
-      $label = 'Speaker/trainer: ';
+      $label = 'Speaker/trainer';
     }
 
     return $label;
@@ -434,13 +482,13 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
   function getLabelForCoaches() {
     $lang = $this->getSelectedParam('language_value');
     if ($lang == 'nl') {
-      $label = 'Begeleider: ';
+      $label = 'Begeleider';
     }
     else if ($lang == 'fr') {
-      $label = 'Accompagnateur : ';
+      $label = 'Accompagnateur';
     }
     else {
-      $label = 'Coach: ';
+      $label = 'Coach';
     }
 
     return $label;

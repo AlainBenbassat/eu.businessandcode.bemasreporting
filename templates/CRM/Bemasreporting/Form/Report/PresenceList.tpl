@@ -28,6 +28,8 @@
         {assign var="bemasTableStyle" value="border-collapse: collapse; font-family: Arial Narrow; border: none"}
         {assign var="bemasColHeaderStyle" value="text-align: left; border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 0px solid #FFFFFF; border-right: 0px solid #FFFFFF; padding-left: 10px; padding-right: 10px; background-color: #1a6c86; color: #FFFFFF"}
         {assign var="bemasCellStyle" value="border-bottom: 1px solid #000000; padding-left: 10px; border-left: 0px solid #FFFFFF; border-right: 0px solid #FFFFFF; padding-right: 10px;"}
+        {assign var="bemasTableHeaderStyle" value="text-align: left; padding: 5px 0px 10px 10px; font-size:1.2em"}
+
 
         {include file="CRM/Bemasreporting/Form/Report/PresenceListRows.tpl"}
 
