@@ -32,6 +32,7 @@ class CRM_Bemasreporting_BounceSummaryHelper {
           ON civicrm_value_individual_details_19.entity_id = contact_a.id
       WHERE contact_a.contact_type = 'Individual'
         AND contact_a.is_deleted = 0
+        AND contact_a.is_deceased = 0
         AND contact_email.on_hold = 1
         AND contact_email.hold_date >= date_add(NOW(), INTERVAL -1 YEAR)
     ";
