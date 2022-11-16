@@ -232,7 +232,7 @@ class CRM_Bemasreporting_BalancedScoreCardData {
       inner JOIN
         civicrm_contact c on m.contact_id = c.id
       inner JOIN
-        civicrm_value_lidmaatschap__35 mc on c.id = mc.entity_id
+        civicrm_value_lidmaatschap__35 mc on m.id = mc.entity_id
       where
         m.start_date <= '$year-12-30'
         and m.end_date >= '$year-12-31'
@@ -256,7 +256,7 @@ class CRM_Bemasreporting_BalancedScoreCardData {
       inner JOIN
         civicrm_contact c on m.contact_id = c.id
       inner JOIN
-        civicrm_value_lidmaatschap__35 mc on c.id = mc.entity_id
+        civicrm_value_lidmaatschap__35 mc on m.id = mc.entity_id
       where
         m.start_date <= '$year-12-30'
         and m.end_date >= '$year-12-31'
