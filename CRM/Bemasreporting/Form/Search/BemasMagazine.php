@@ -24,6 +24,7 @@ class CRM_Bemasreporting_Form_Search_BemasMagazine extends CRM_Contact_Form_Sear
       'Postal Code' => 'postal_code',
       'City' => 'city',
       'Country' => 'country',
+      'VAT' => 'vat_number',
     ];
     return $columns;
   }
@@ -51,6 +52,7 @@ class CRM_Bemasreporting_Form_Search_BemasMagazine extends CRM_Contact_Form_Sear
       , if(magpref.versturen_naar_149 = 2, mag_a.postal_code, empl_a.postal_code) postal_code
       , if(magpref.versturen_naar_149 = 2, mag_a.city, empl_a.city) city
       , if(magpref.versturen_naar_149 = 2, mag_a_ctry.name, empl_a_ctry.name) country
+      , empl_details.vat_number_11 vat_number
     ";
 
     return $select;
@@ -70,6 +72,8 @@ class CRM_Bemasreporting_Form_Search_BemasMagazine extends CRM_Contact_Form_Sear
         civicrm_address empl_a on empl_a.contact_id = contact_a.employer_id and empl_a.is_primary = 1
       LEFT OUTER JOIN
         civicrm_country empl_a_ctry on empl_a_ctry.id = empl_a.country_id
+      LEFT OUTER JOIN
+        civicrm_value_organization_details_14 empl_details on empl_details.entity_id = contact_a.employer_id
     ";
 
     return $from;
