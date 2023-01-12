@@ -586,7 +586,7 @@ class CRM_Bemasreporting_InconsistenciesHelper {
 
     // deelnemers zonder werkgever
     $q = new BemasInconsistenciesQuery();
-    $q->label = 'Deelnamers zonder werkgever';
+    $q->label = 'Deelnemers zonder werkgever';
     $q->index = $index;
     $q->from = "civicrm_contact contact_a
     ";
