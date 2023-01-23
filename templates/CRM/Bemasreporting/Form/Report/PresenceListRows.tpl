@@ -8,7 +8,7 @@
         <tr>
             <td width="20%" style="font-size: 1.3em; font-family: Arial Narrow">{$eventDate}</td>
             <td style="text-align: center; font-weight: bold; font-size: 1.3em; font-family: Arial Narrow">{$eventTitle}</td>
-            <td width="20%" style="text-align: right"><img width="150" src="https://www.bemas.org/sites/default/files/bemas/bemas_logo_200.jpg"></td>
+            <td width="20%" style="text-align: right"><img width="150" src="https://crm.bemas.org/sites/default/files/bemas/bemas_logo_200.jpg"></td>
         </tr>
     </table>
 
