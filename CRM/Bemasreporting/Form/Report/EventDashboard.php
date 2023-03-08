@@ -189,6 +189,7 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
       // income
       $event_income = 0;
       $event_min_income = 0;
+      $event_min_income_with_margin = 0;
 
       // hyperlinks to event and participants
       $eventLink = CRM_Utils_System::baseURL() . 'civicrm/event/manage/settings?reset=1&action=update&id=' . $row['civicrm_event_id'];
@@ -199,7 +200,8 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
       $sql = "
         select
           concat(a.street_address, ', ', a.city) location,
-          ifnull(s.minimum_budget_151, 0) event_min_income
+          ifnull(s.minimum_budget_151, 0) event_min_income,
+          ifnull(s.minimum_budget_190, 0) event_min_income_with_margin
         from
           civicrm_event e
         left outer join
@@ -216,6 +218,7 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
       $dao->fetch();
 
       $event_min_income = $dao->event_min_income;
+      $event_min_income_with_margin = $dao->event_min_income_with_margin;
 
       // change title in a hyperlink
       $url = "<a href=\"$eventLink\">{$row['civicrm_event_title']}</a>";
@@ -268,6 +271,9 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
       if ($event_min_income > 0) {
         if ($event_income < $event_min_income) {
           $color = 'red';
+        }
+        elseif ($event_income < $event_min_income_with_margin) {
+          $color = 'orange';
         }
         else {
           $color = 'green';
