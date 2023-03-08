@@ -201,7 +201,7 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
         select
           concat(a.street_address, ', ', a.city) location,
           ifnull(s.minimum_budget_151, 0) event_min_income,
-          ifnull(s.minimum_budget_190, 0) event_min_income_with_margin
+          ifnull(s.minimum_budget_met_marge_190, 0) event_min_income_with_margin
         from
           civicrm_event e
         left outer join
