@@ -53,11 +53,13 @@ class CRM_Bemasreporting_Form_Report_InconsistenciesSummary extends CRM_Report_F
       $sql = "select count(*) from " . $q->from . " where " . $q->where;
       $count = CRM_Core_DAO::singleValueQuery($sql);
 
-      // add a row
-      $row = [];
-      $row['civicrm_contact_column1'] = $q->label;
-      $row['civicrm_contact_column2'] = $count;
-      $rows[] = $row;
+      if ($count > 0) {
+        // add a row
+        $row = [];
+        $row['civicrm_contact_column1'] = $q->label;
+        $row['civicrm_contact_column2'] = $count;
+        $rows[] = $row;
+      }
     }
 
     // add link to custom search

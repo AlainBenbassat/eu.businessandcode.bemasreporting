@@ -26,6 +26,23 @@ class CRM_Bemasreporting_InconsistenciesHelper {
 
     $index = 0;
 
+    // bug koppeling bijdrage en deelname
+    $q = new BemasInconsistenciesQuery();
+    $q->label = '<span style="color:red; font-weight: bold">BUG koppeling deelname / bijdrage</span>';
+    $q->index = $index;
+    $q->from = "civicrm_contact contact_a
+      inner join
+        civicrm_participant p on p.contact_id = contact_a.id
+      inner join
+        civicrm_participant_payment pp on pp.participant_id = p.id
+    ";
+    $q->where = "
+      pp.participant_id = pp.contribution_id
+    ";
+    $this->queries[$index] = $q;
+    $this->queriesRadioButtons[$q->index] = $q->label;
+    $index++;
+
     // namen zonder hoofdletters
     $q = new BemasInconsistenciesQuery();
     $q->label = 'Voornaam en/of achternaam zonder hoofdletters';
