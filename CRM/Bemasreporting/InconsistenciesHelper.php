@@ -32,12 +32,10 @@ class CRM_Bemasreporting_InconsistenciesHelper {
     $q->index = $index;
     $q->from = "civicrm_contact contact_a
       inner join
-        civicrm_participant p on p.contact_id = contact_a.id
-      inner join
-        civicrm_participant_payment pp on pp.participant_id = p.id
+        civicrm_contribution cc on cc.contact_id = contact_a.id
     ";
     $q->where = "
-      pp.participant_id = pp.contribution_id
+      cc.id in (select contribution_id from civicrm_participant_payment where participant_id = contribution_id)
     ";
     $this->queries[$index] = $q;
     $this->queriesRadioButtons[$q->index] = $q->label;
