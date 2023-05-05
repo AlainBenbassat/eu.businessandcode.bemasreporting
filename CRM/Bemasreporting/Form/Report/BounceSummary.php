@@ -106,7 +106,7 @@ class CRM_Bemasreporting_Form_Report_BounceSummary extends CRM_Report_Form {
     $rows[2]['civicrm_contact_lang_fr'] = $this->getNumBounces("mx", '', 'fr');
     $rows[2]['civicrm_contact_lang_total'] = $this->getNumBounces("mx", '', '');
 
-    $funcArr = array('MNGR', 'TECH', 'ENG', 'ASSET', 'FSM', 'DIRPROD');
+    $funcArr = array('MMNGR', 'TECH', 'ENG', 'ASSET', 'FSM', 'DIRPROD');
     for ($i = 0; $i < count($funcArr); $i++) {
       $rows[3 + $i]['civicrm_contact_types_of_member_contact_60'] = $funcArr[$i];
       $rows[3 + $i]['civicrm_contact_lang_nl'] = $this->getNumBounces('', $funcArr[$i], 'nl');
