@@ -59,7 +59,7 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
       , contact_a.first_name
       , contact_a.last_name
       , contact_a.job_title
-      , e.email
+      , emll.email
       , org.organization_name
       , orgaddr.postal_code
       , orgaddr.city
@@ -74,7 +74,7 @@ class CRM_Bemasreporting_Form_Search_Inconsistencies extends CRM_Contact_Form_Se
       $from = 'FROM ' . $this->helper->queries[$values['queryFilter']]->from
         . ' left outer join civicrm_contact org on org.id = contact_a.employer_id'
         . ' left outer join civicrm_address orgaddr on orgaddr.contact_id = org.id and orgaddr.is_primary = 1'
-        . ' left outer join civicrm_email e on e.contact_id = contact_a.id and e.is_primary = 1 ';
+        . ' left outer join civicrm_email emll on emll.contact_id = contact_a.id and emll.is_primary = 1 ';
     }
     else {
       $from = "FROM civicrm_contact contact_a";
