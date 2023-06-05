@@ -431,10 +431,10 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
       return 'Deelnemers';
     }
     elseif ($lang == 'fr') {
-      return 'Paticipants';
+      return 'Participants';
     }
     else {
-      return 'Paticipants';
+      return 'Participants';
     }
   }
 
