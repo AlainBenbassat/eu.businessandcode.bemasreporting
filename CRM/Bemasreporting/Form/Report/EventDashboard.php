@@ -193,7 +193,7 @@ class CRM_Bemasreporting_Form_Report_EventDashboard extends CRM_Report_Form {
 
       // hyperlinks to event and participants
       $eventLink = CRM_Utils_System::baseURL() . 'civicrm/event/manage/settings?reset=1&action=update&id=' . $row['civicrm_event_id'];
-      $participantLink = CRM_Utils_System::baseURL() . 'civicrm/event/search?reset=1&force=1&status=true&event=' . $row['civicrm_event_id'];
+      $participantLink = CRM_Utils_System::baseURL() . 'civicrm/bemasdeelnemerslijst#/?Contact_Participant_contact_id_01.event_id=' . $row['civicrm_event_id'];
       $participantCancelledLink = CRM_Utils_System::baseURL() . 'civicrm/event/search?reset=1&force=1&status=false&event=' . $row['civicrm_event_id'];
 
       // get extra event information
