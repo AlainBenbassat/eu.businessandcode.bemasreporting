@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: alain
- * Date: 12/10/18
- * Time: 14:01
- */
 
 class CRM_Bemasreporting_Task_ShowPresenceList extends CRM_Event_Form_Task {
 
@@ -13,9 +7,32 @@ class CRM_Bemasreporting_Task_ShowPresenceList extends CRM_Event_Form_Task {
     $queryParams[] = 'reset=1';
     $queryParams[] = 'output=criteria';
 
-    // try to get the event id
-    // step 1: check if we have event= in the entryURL of the session
+    $event_id = $this->getEventId();
+    if ($event_id > 0) {
+      $queryParams[] = 'event_id=' . $event_id;
+    }
+
+    // redirect to the presence report instance (i.e. id = 61)
+    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/report/instance/61', implode('&', $queryParams)));
+
+    parent::__construct();
+  }
+
+  private function getEventId() {
+    // the event_id can be found everywhere...
+
+    $event_id = $this->getEventIdFromEntryUrl();
+
+    if (!$event_id) {
+      $event_id = $this->getEventIdFromPreviousSearch();
+    }
+
+    return $event_id;
+  }
+
+  private function getEventIdFromEntryUrl() {
     $event_id = 0;
+
     $session = CRM_Core_Session::singleton();
     $entryURL = $session->get('entryURL');
     if (strpos($entryURL, '&amp;event=')) {
@@ -28,27 +45,26 @@ class CRM_Bemasreporting_Task_ShowPresenceList extends CRM_Event_Form_Task {
         }
       }
     }
-    else {
-      // step 2: no event id in the url, check previous search in session
-      $allVars = [];
-      $session->getVars($allVars);
-      foreach ($allVars as $sessionKey => $sessionValue) {
-        if (strpos($sessionKey, 'CRM_Event_Controller_Search_') !== FALSE) {
-          if (array_key_exists('formValues', $sessionValue)) {
-            if (array_key_exists('event_id', $sessionValue['formValues'])) {
-              $event_id = $sessionValue['formValues']['event_id'];
-            }
-          }
+
+    return $event_id;
+  }
+
+  private function getEventIdFromPreviousSearch() {
+    $event_id = 0;
+
+    $session = CRM_Core_Session::singleton();
+    $allVars = [];
+    $session->getVars($allVars);
+    foreach ($allVars as $sessionKey => $sessionValue) {
+      if (strpos($sessionKey, 'CRM_Event_Controller_Search_') !== FALSE) {
+        if (!empty($sessionValue['formValues']['event_id'])) {
+          $event_id = $sessionValue['formValues']['event_id'];
+          break;
         }
       }
     }
 
-    if ($event_id > 0) {
-      $queryParams[] = 'event_id=' . $event_id;
-    }
-
-    // redirect to the presence report instance (i.e. id = 61)
-    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/report/instance/61', implode('&', $queryParams)));
+    return $event_id;
   }
 
 }

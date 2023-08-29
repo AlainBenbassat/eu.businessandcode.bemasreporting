@@ -6,9 +6,21 @@ function bemasreporting_civicrm_searchTasks($objectType, &$tasks) {
   if ($objectType == 'event') {
     $tasks[] = [
       'title' => 'Intekenlijst / Liste de présences',
-      'class' => 'CRM_Bemasreporting_Task_ShowPresenceList', //'CRM_Bemasreporting_Form_Report_PresenceList',
+      'class' => 'CRM_Bemasreporting_Task_ShowPresenceList',
     ];
   }
+}
+
+function bemasreporting_civicrm_searchKitTasks(array &$tasks, bool $checkPermissions, ?int $userID) {
+  $tasks['Participant']['participant_list'] = [
+    'title' => 'Intekenlijst / Liste de présences',
+    'icon' => 'fa-print',
+    'redirect' => [
+      'path' => "'civicrm/report/instance/61'",
+      'query' => "{reset: 1}",
+      'data' => "{participant_ids: ids.join(',')}",
+    ],
+  ];
 }
 
 /**
@@ -18,17 +30,6 @@ function bemasreporting_civicrm_searchTasks($objectType, &$tasks) {
  */
 function bemasreporting_civicrm_config(&$config) {
   _bemasreporting_civix_civicrm_config($config);
-}
-
-/**
- * Implements hook_civicrm_xmlMenu().
- *
- * @param array $files
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_xmlMenu
- */
-function bemasreporting_civicrm_xmlMenu(&$files) {
-  _bemasreporting_civix_civicrm_xmlMenu($files);
 }
 
 /**
@@ -84,56 +85,6 @@ function bemasreporting_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
 }
 
 /**
- * Implements hook_civicrm_managed().
- *
- * Generate a list of entities to create/deactivate/delete when this module
- * is installed, disabled, uninstalled.
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_managed
- */
-function bemasreporting_civicrm_managed(&$entities) {
-  _bemasreporting_civix_civicrm_managed($entities);
-}
-
-/**
- * Implements hook_civicrm_caseTypes().
- *
- * Generate a list of case-types.
- *
- * @param array $caseTypes
- *
- * Note: This hook only runs in CiviCRM 4.4+.
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_caseTypes
- */
-function bemasreporting_civicrm_caseTypes(&$caseTypes) {
-  _bemasreporting_civix_civicrm_caseTypes($caseTypes);
-}
-
-/**
- * Implements hook_civicrm_angularModules().
- *
- * Generate a list of Angular modules.
- *
- * Note: This hook only runs in CiviCRM 4.5+. It may
- * use features only available in v4.6+.
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_caseTypes
- */
-function bemasreporting_civicrm_angularModules(&$angularModules) {
-_bemasreporting_civix_civicrm_angularModules($angularModules);
-}
-
-/**
- * Implements hook_civicrm_alterSettingsFolders().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_alterSettingsFolders
- */
-function bemasreporting_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
-  _bemasreporting_civix_civicrm_alterSettingsFolders($metaDataFolders);
-}
-
-/**
  * Functions below this ship commented out. Uncomment as required.
  *
 
@@ -142,9 +93,8 @@ function bemasreporting_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_preProcess
  *
-function bemasreporting_civicrm_preProcess($formName, &$form) {
 
-} // */
+ // */
 
 /**
  * Implements hook_civicrm_navigationMenu().
@@ -162,3 +112,21 @@ function bemasreporting_civicrm_navigationMenu(&$menu) {
   ));
   _bemasreporting_civix_navigationMenu($menu);
 } // */
+
+/**
+ * Implements hook_civicrm_postInstall().
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_postInstall
+ */
+function bemasreporting_civicrm_postInstall() {
+  _bemasreporting_civix_civicrm_postInstall();
+}
+
+/**
+ * Implements hook_civicrm_entityTypes().
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_entityTypes
+ */
+function bemasreporting_civicrm_entityTypes(&$entityTypes) {
+  _bemasreporting_civix_civicrm_entityTypes($entityTypes);
+}

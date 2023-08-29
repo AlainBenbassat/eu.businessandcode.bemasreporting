@@ -232,10 +232,10 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
   }
 
   function getSelectedParam($name) {
-    if (array_key_exists($name, $this->_params) && $this->_params[$name]) {
+    if (!empty($this->_params[$name])) {
       return $this->_params[$name];
     }
-    elseif (array_key_exists($name, $this->_submitValues) && $this->_submitValues[$name]) {
+    elseif (!empty($this->_submitValues[$name])) {
       return $this->_submitValues[$name];
     }
     elseif ($name == 'event_value' && $_SESSION['event_value']) {
@@ -298,20 +298,44 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
   }
 
   private function storeEventId() {
-    // see if we have an event id in the url
+    $event_id = $this->getEventIdFromUrl();
+
+    if (!$event_id) {
+      $event_id = $this->getEventIdFromParticipantIdsInUrl();
+    }
+
+    if (!$event_id) {
+      $event_id = $this->getSelectedParam('event_value');
+    }
+
+    $this->eventId = $event_id ?? 0;
+  }
+
+  private function getEventIdFromUrl() {
     if (($event_id = CRM_Utils_Request::retrieve('event_id', 'Positive'))) {
       // OK, store in the session
       $_SESSION['event_value'] = $event_id;
+
+      return $event_id;
     }
     else {
-      // not found, check submit values
-      $event_id = $this->getSelectedParam('event_value');
-      if (!$event_id) {
-        $event_id = 0;
+      return 0;
+    }
+  }
+
+  private function getEventIdFromParticipantIdsInUrl() {
+    if (($participant_ids = CRM_Utils_Request::retrieve('participant_ids', 'String'))) {
+      $decodedParticipantIds = explode(',', urldecode($participant_ids));
+      if (count($decodedParticipantIds) > 0) {
+        $event_id = CRM_Core_DAO::singleValueQuery("select event_id from civicrm_participant where id = " . $decodedParticipantIds[0]);
+        $_SESSION['event_value'] = $event_id;
+
+        return $event_id;
       }
     }
-
-    $this->eventId = $event_id;
+    else {
+      return 0;
+    }
   }
 
   private function storeEventDefaults() {
