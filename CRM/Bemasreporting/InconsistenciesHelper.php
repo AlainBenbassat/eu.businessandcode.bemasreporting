@@ -52,9 +52,9 @@ class CRM_Bemasreporting_InconsistenciesHelper {
       and contact_a.first_name <> '.'
       and contact_a.first_name <> ''
       and (
-        contact_a.first_name COLLATE utf8_bin = LOWER(contact_a.first_name) COLLATE utf8_bin
+        contact_a.first_name COLLATE utf8mb4_bin = LOWER(contact_a.first_name) COLLATE utf8mb4_bin
       or
-        contact_a.last_name COLLATE utf8_bin = LOWER(contact_a.last_name) COLLATE utf8_bin
+        contact_a.last_name COLLATE utf8mb4_bin = LOWER(contact_a.last_name) COLLATE utf8mb4_bin
       )
       and contact_a.contact_type = 'Individual'
       and contact_a.is_deleted = 0
