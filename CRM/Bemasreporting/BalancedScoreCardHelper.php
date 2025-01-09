@@ -147,9 +147,19 @@ class CRM_Bemasreporting_BalancedScoreCardHelper {
       'method' => 'getMembers501to1000', // getMemberCountByID($y, 5)
     ];
     $this->rowHeaders['Q' . ++$rowCounter] = [
-      'label' => 'Membership [>1000]',
+      'label' => 'Membership [1001-2500]',
       'is_header' => FALSE,
-      'method' => 'getMembers1001andMore', // getMemberCountByID($y, 6)
+      'method' => 'getMembers1001to2500', // getMemberCountByID($y, 6)
+    ];
+    $this->rowHeaders['Q' . ++$rowCounter] = [
+      'label' => 'Membership [2501-5000]',
+      'is_header' => FALSE,
+      'method' => 'getMembers2501to5000', // getMemberCountByID($y, 13)
+    ];
+    $this->rowHeaders['Q' . ++$rowCounter] = [
+      'label' => 'Membership [+5000]',
+      'is_header' => FALSE,
+      'method' => 'getMembers5001andMore', // getMemberCountByID($y, 14)
     ];
     $this->rowHeaders['Q' . ++$rowCounter] = [
       'label' => '',

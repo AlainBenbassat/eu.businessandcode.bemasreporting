@@ -301,8 +301,16 @@ class CRM_Bemasreporting_BalancedScoreCardData {
     return $this->getMemberCountByID($year, 5);
   }
 
-  public function getMembers1001andMore($year) {
+  public function getMembers1001to2500($year) {
     return $this->getMemberCountByID($year, 6);
+  }
+
+  public function getMembers2501to5000($year) {
+    return $this->getMemberCountByID($year, 13);
+  }
+
+  public function getMembers5001andMore($year) {
+    return $this->getMemberCountByID($year, 14);
   }
 
   private function getMemberCountByID($year, $membershipTypeID) {
