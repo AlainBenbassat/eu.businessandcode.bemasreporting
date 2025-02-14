@@ -39,12 +39,12 @@ class CRM_Bemasreporting_Form_Report_PresenceList extends CRM_Report_Form {
           ],
           'newsletter' => [
             'title' => 'Ontvangt graag<br>BEMAS nieuwsbrief',
-            'required' => TRUE,
+            'required' => FALSE,
             'dbAlias' => "'&nbsp;Ja&nbsp;&nbsp;|&nbsp;&nbsp;Nee&nbsp;'",
           ],
           'sharecontact' => [
             'title' => 'Toestemming voor delen<br>contactgegevens met<br>derden (bv. spreker)',
-            'required' => TRUE,
+            'required' => FALSE,
             'dbAlias' => "'&nbsp;Ja&nbsp;&nbsp;|&nbsp;&nbsp;Nee&nbsp;'",
           ],
           'signature' => [
